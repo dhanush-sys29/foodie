@@ -16,8 +16,10 @@ import { MapProvider } from "@/components/map-provider";
 import { Home, Utensils, Bike } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCollection, useFirestore } from "@/firebase";
-import { collection } from "firebase/firestore";
+import { collection, doc, updateDoc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 interface DeliveryJob {
   id: string;
@@ -38,7 +40,21 @@ export default function DeliveriesPage() {
   }, [firestore]);
 
   const { data: deliveryJobs, loading } = useCollection<DeliveryJob>(deliveriesRef);
-  const [selectedJob, setSelectedJob] = useState<DeliveryJob | null>(deliveryJobs?.[0] || null);
+  const [selectedJob, setSelectedJob] = useState<DeliveryJob | null>(null);
+
+  const updateDeliveryStatus = (jobId: string, status: string) => {
+    if (!firestore) return;
+    const deliveryRef = doc(firestore, "deliveries", jobId);
+    updateDoc(deliveryRef, { status: status })
+        .catch(async (serverError) => {
+            const permissionError = new FirestorePermissionError({
+                path: deliveryRef.path,
+                operation: 'update',
+                requestResourceData: { status },
+            });
+            errorEmitter.emit('permission-error', permissionError);
+        });
+  };
 
   if (loading) {
     return (
@@ -64,8 +80,8 @@ export default function DeliveriesPage() {
   
   if (!deliveryJobs || deliveryJobs.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <p>No delivery jobs available.</p>
+      <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+        <p className="font-bold text-lg">No delivery jobs available.</p>
       </div>
     );
   }
@@ -155,10 +171,16 @@ export default function DeliveriesPage() {
             <p className="font-bold text-lg text-primary">{currentJob.status}</p>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button variant="outline">Decline</Button>
-            <Button>
-              <Bike className="mr-2 h-4 w-4" /> Picked Up
-            </Button>
+            <Button variant="outline" onClick={() => updateDeliveryStatus(currentJob.id, 'Declined')} disabled={currentJob.status === 'Declined' || currentJob.status === 'Delivered'}>Decline</Button>
+            {currentJob.status === 'Picked Up' ? (
+              <Button onClick={() => updateDeliveryStatus(currentJob.id, 'Delivered')}>
+                <Home className="mr-2 h-4 w-4" /> Delivered
+              </Button>
+            ) : currentJob.status !== 'Delivered' && currentJob.status !== 'Declined' ? (
+              <Button onClick={() => updateDeliveryStatus(currentJob.id, 'Picked Up')}>
+                <Bike className="mr-2 h-4 w-4" /> Picked Up
+              </Button>
+            ) : null}
           </CardFooter>
         </Card>
       </div>

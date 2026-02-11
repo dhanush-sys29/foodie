@@ -1,0 +1,81 @@
+{
+  "entities": {
+    "Restaurant": {
+      "title": "Restaurant",
+      "description": "A restaurant entry",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the restaurant"
+        },
+        "cuisine": {
+          "type": "string",
+          "description": "The type of cuisine the restaurant serves"
+        },
+        "rating": {
+          "type": "number",
+          "description": "The rating of the restaurant"
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of an image of the restaurant"
+        },
+        "imageHint": {
+          "type": "string",
+          "description": "A hint for AI to find a relevant image"
+        }
+      },
+      "required": ["name", "cuisine"]
+    },
+    "MenuItem": {
+      "title": "Menu Item",
+      "description": "An item on a restaurant's menu",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the menu item"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the menu item"
+        },
+        "price": {
+          "type": "number",
+          "description": "The price of the menu item"
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of an image of the menu item"
+        },
+        "imageHint": {
+          "type": "string",
+          "description": "A hint for AI to find a relevant image"
+        },
+        "available": {
+          "type": "boolean",
+          "description": "Whether the menu item is currently available"
+        }
+      },
+      "required": ["name", "price", "available"]
+    }
+  },
+  "auth": {
+    "providers": []
+  },
+  "firestore": {
+    "/restaurants/{restaurantId}": {
+      "schema": {
+        "$ref": "#/backend/entities/Restaurant"
+      },
+      "description": "Restaurant documents"
+    },
+    "/restaurants/{restaurantId}/menuItems/{menuItemId}": {
+      "schema": {
+        "$ref": "#/backend/entities/MenuItem"
+      },
+      "description": "Menu item documents for a specific restaurant"
+    }
+  }
+}

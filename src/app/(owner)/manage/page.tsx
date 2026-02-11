@@ -1,8 +1,7 @@
+"use client";
+
 import Image from "next/image";
-import {
-  File,
-  PlusCircle,
-} from "lucide-react";
+import { File, PlusCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +10,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter
+  CardFooter,
 } from "@/components/ui/card";
 import {
   Table,
@@ -28,15 +27,90 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { menuItems, orders } from "@/lib/data";
+import { orders } from "@/lib/data";
+import { useCollection, useFirestore } from "@/firebase";
+import { collection } from "firebase/firestore";
+import { useMemo } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+
+interface MenuItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  available: boolean;
+  imageHint: string;
+}
 
 export default function OwnerDashboard() {
-  const myMenuItems = menuItems['1']; // Assuming owner of Pizza Palace
+  const restaurantId = "1"; // Assuming owner of Pizza Palace (id: 1)
+  const firestore = useFirestore();
+
+  const menuItemsRef = useMemo(() => {
+    if (!firestore) return null;
+    return collection(firestore, "restaurants", restaurantId, "menuItems");
+  }, [firestore, restaurantId]);
+
+  const { data: myMenuItems, loading } = useCollection<MenuItem>(menuItemsRef);
+
+  const menuContent = loading ? (
+    <TableBody>
+      {Array.from({ length: 3 }).map((_, i) => (
+        <TableRow key={i}>
+          <TableCell className="hidden sm:table-cell">
+            <Skeleton className="aspect-square rounded-md object-cover h-16 w-16" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-5 w-24" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-5 w-12" />
+          </TableCell>
+          <TableCell className="hidden md:table-cell">
+            <Skeleton className="h-5 w-48" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-6 w-11" />
+          </TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
+  ) : (
+    <TableBody>
+      {myMenuItems?.map((item) => (
+        <TableRow key={item.id}>
+          <TableCell className="hidden sm:table-cell">
+            <Image
+              alt={item.name}
+              className="aspect-square rounded-md object-cover"
+              height="64"
+              src={`https://picsum.photos/seed/${item.id}/64/64`}
+              width="64"
+              data-ai-hint={item.imageHint}
+            />
+          </TableCell>
+          <TableCell className="font-medium">{item.name}</TableCell>
+          <TableCell>₹{item.price.toFixed(2)}</TableCell>
+          <TableCell className="hidden md:table-cell">
+            {item.description}
+          </TableCell>
+          <TableCell>
+            <Switch
+              defaultChecked={item.available}
+              aria-label="Toggle availability"
+            />
+          </TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
+  );
 
   return (
     <>
       <div className="flex items-center">
-        <h1 className="text-lg font-semibold md:text-2xl font-headline">My Restaurant</h1>
+        <h1 className="text-lg font-semibold md:text-2xl font-headline">
+          My Restaurant
+        </h1>
       </div>
       <Tabs defaultValue="menu">
         <div className="flex items-center">
@@ -84,37 +158,19 @@ export default function OwnerDashboard() {
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {myMenuItems.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="hidden sm:table-cell">
-                        <Image
-                          alt={item.name}
-                          className="aspect-square rounded-md object-cover"
-                          height="64"
-                          src={`https://picsum.photos/seed/${item.id}/64/64`}
-                          width="64"
-                          data-ai-hint={item.imageHint}
-                        />
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {item.name}
-                      </TableCell>
-                      <TableCell>${item.price.toFixed(2)}</TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {item.description}
-                      </TableCell>
-                      <TableCell>
-                        <Switch defaultChecked={item.available} aria-label="Toggle availability"/>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
+                {menuContent}
               </Table>
             </CardContent>
             <CardFooter>
               <div className="text-xs text-muted-foreground">
-                Showing <strong>1-{myMenuItems.length}</strong> of <strong>{myMenuItems.length}</strong> products
+                Showing{" "}
+                <strong>
+                  1-{myMenuItems?.length || 0}
+                </strong> of{" "}
+                <strong>
+                  {myMenuItems?.length || 0}
+                </strong>{" "}
+                products
               </div>
             </CardFooter>
           </Card>
@@ -122,38 +178,45 @@ export default function OwnerDashboard() {
         <TabsContent value="orders">
           <Card>
             <CardHeader>
-                <CardTitle>Orders</CardTitle>
-                <CardDescription>
-                    A list of recent orders for your restaurant.
-                </CardDescription>
+              <CardTitle>Orders</CardTitle>
+              <CardDescription>
+                A list of recent orders for your restaurant.
+              </CardDescription>
             </CardHeader>
             <CardContent>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Order ID</TableHead>
-                            <TableHead>Customer</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="text-right">Total</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {orders.map((order) => (
-                            <TableRow key={order.id}>
-                                <TableCell className="font-medium">{order.id}</TableCell>
-                                <TableCell>{order.customer}</TableCell>
-                                <TableCell>
-                                    <Badge variant={order.status === 'Delivered' ? 'secondary' : 'default'}
-                                    className={order.status === 'In Progress' ? 'bg-blue-500' : ''}
-                                    >
-                                        {order.status}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Order ID</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Total</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {orders.map((order) => (
+                    <TableRow key={order.id}>
+                      <TableCell className="font-medium">{order.id}</TableCell>
+                      <TableCell>{order.customer}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            order.status === "Delivered" ? "secondary" : "default"
+                          }
+                          className={
+                            order.status === "In Progress" ? "bg-blue-500" : ""
+                          }
+                        >
+                          {order.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        ₹{order.total.toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>

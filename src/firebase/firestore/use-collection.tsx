@@ -6,6 +6,9 @@ import {
   type CollectionReference,
   type Query,
 } from 'firebase/firestore';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
+
 
 // Note: T is the type of the document data, without the id.
 export function useCollection<T>(ref: CollectionReference | Query | null) {
@@ -32,9 +35,14 @@ export function useCollection<T>(ref: CollectionReference | Query | null) {
         setLoading(false);
         setError(null);
       },
-      (err) => {
-        console.error(err);
-        setError(err);
+      async (err) => {
+        const path = (ref as CollectionReference).path;
+        const permissionError = new FirestorePermissionError({
+          path: path,
+          operation: 'list',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        setError(permissionError);
         setData(null);
         setLoading(false);
       }

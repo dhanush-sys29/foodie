@@ -32,6 +32,8 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 type UserType = "Customer" | "Restaurant" | "Delivery";
 
@@ -93,7 +95,15 @@ export default function LoginPage() {
           userProfile.restaurantId = "1";
         }
 
-        await setDoc(doc(firestore, "users", newUser.uid), userProfile);
+        const userDocRef = doc(firestore, "users", newUser.uid);
+        setDoc(userDocRef, userProfile).catch(async (serverError) => {
+          const permissionError = new FirestorePermissionError({
+            path: userDocRef.path,
+            operation: "create",
+            requestResourceData: userProfile,
+          });
+          errorEmitter.emit("permission-error", permissionError);
+        });
         toast({ title: "Account created successfully!" });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
@@ -130,7 +140,16 @@ export default function LoginPage() {
             if (userProfile.role === 'restaurant') {
                 userProfile.restaurantId = '1';
             }
-            await setDoc(userDocRef, userProfile);
+            setDoc(userDocRef, userProfile).catch(
+              async (serverError) => {
+                const permissionError = new FirestorePermissionError({
+                  path: userDocRef.path,
+                  operation: "create",
+                  requestResourceData: userProfile,
+                });
+                errorEmitter.emit("permission-error", permissionError);
+              }
+            );
             toast({ title: "Account created successfully!" });
         } else {
             toast({ title: "Signed in successfully!" });

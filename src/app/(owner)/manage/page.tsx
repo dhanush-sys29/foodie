@@ -4,7 +4,7 @@
 import Image from "next/image";
 import { useMemo } from "react";
 import { File, PlusCircle } from "lucide-react";
-import { collection } from "firebase/firestore";
+import { collection, doc, updateDoc } from "firebase/firestore";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,8 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCollection, useFirestore, useUser } from "@/firebase";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 interface MenuItem {
   id: string;
@@ -67,6 +69,20 @@ export default function OwnerDashboard() {
 
   const { data: myMenuItems, loading: menuLoading } = useCollection<MenuItem>(menuItemsRef);
   const { data: restaurantOrders, loading: ordersLoading } = useCollection<Order>(ordersRef);
+
+  const toggleAvailability = (itemId: string, currentStatus: boolean) => {
+    if (!firestore || !restaurantId) return;
+    const itemRef = doc(firestore, "restaurants", restaurantId, "menuItems", itemId);
+    updateDoc(itemRef, { available: !currentStatus })
+        .catch(async (serverError) => {
+            const permissionError = new FirestorePermissionError({
+                path: itemRef.path,
+                operation: 'update',
+                requestResourceData: { available: !currentStatus },
+            });
+            errorEmitter.emit('permission-error', permissionError);
+        });
+  };
 
   const menuContent = menuLoading ? (
     <TableBody>
@@ -111,7 +127,8 @@ export default function OwnerDashboard() {
           </TableCell>
           <TableCell>
             <Switch
-              defaultChecked={item.available}
+              checked={item.available}
+              onCheckedChange={() => toggleAvailability(item.id, item.available)}
               aria-label="Toggle availability"
             />
           </TableCell>

@@ -1,3 +1,76 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "restaurant-1",
+      "description": "A modern and bright restaurant interior",
+      "imageUrl": "https://images.unsplash.com/photo-1526069631228-723c945bea6b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxyZXN0YXVyYW50JTIwaW50ZXJpb3J8ZW58MHx8fHwxNzcwNzg5MDE3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "restaurant interior"
+    },
+    {
+      "id": "restaurant-2",
+      "description": "A classic American diner style restaurant",
+      "imageUrl": "https://images.unsplash.com/photo-1669982920227-d492e9466073?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkaW5lciUyMHJlc3RhdXJhbnR8ZW58MHx8fHwxNzcwODA2NDI3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "diner restaurant"
+    },
+    {
+      "id": "restaurant-3",
+      "description": "A sleek and modern sushi bar",
+      "imageUrl": "https://images.unsplash.com/photo-1502364271109-0a9a75a2a9df?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzdXNoaSUyMGJhcnxlbnwwfHx8fDE3NzA3MjgxNTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "sushi bar"
+    },
+    {
+      "id": "restaurant-4",
+      "description": "A vibrant and colorful Mexican restaurant",
+      "imageUrl": "https://images.unsplash.com/photo-1613478549952-47b2db19e194?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtZXhpY2FuJTIwcmVzdGF1cmFudHxlbnwwfHx8fDE3NzA4MDY0MjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mexican restaurant"
+    },
+    {
+      "id": "food-pizza",
+      "description": "A classic Margherita pizza on a wooden board",
+      "imageUrl": "https://images.unsplash.com/photo-1513104890138-7c749659a591?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxtYXJnaGVyaXRhJTIwcGl6emF8ZW58MHx8fHwxNzcwNzg4ODIyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "margherita pizza"
+    },
+    {
+      "id": "food-pepperoni-pizza",
+      "description": "A greasy pepperoni pizza slice being lifted",
+      "imageUrl": "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwZXBwZXJvbmklMjBwaXp6YXxlbnwwfHx8fDE3NzA3ODg4MjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "pepperoni pizza"
+    },
+    {
+      "id": "food-garlic-bread",
+      "description": "Cheesy garlic bread sticks on a plate",
+      "imageUrl": "https://images.unsplash.com/photo-1619531040576-f9416740661b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxnYXJsaWMlMjBicmVhZHxlbnwwfHx8fDE3NzA3NjM5NTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "garlic bread"
+    },
+    {
+      "id": "food-burger",
+      "description": "A juicy cheeseburger with lettuce and tomato",
+      "imageUrl": "https://images.unsplash.com/photo-1598182198871-d3f4ab4fd181?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjaGVlc2VidXJnZXJ8ZW58MHx8fHwxNzcwNzgzNTUyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cheeseburger"
+    },
+    {
+      "id": "food-fries",
+      "description": "A basket of crispy golden french fries",
+      "imageUrl": "https://images.unsplash.com/photo-1615485290836-4ebcebf44aaf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxmcmVuY2glMjBmcmllc3xlbnwwfHx8fDE3NzA3NDA4NTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "french fries"
+    },
+    {
+      "id": "food-sushi",
+      "description": "An assortment of fresh sushi rolls on a platter",
+      "imageUrl": "https://images.unsplash.com/photo-1582450871972-ab5ca641643d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxzdXNoaSUyMHJvbGx8ZW58MHx8fHwxNzcwNzUxNjA2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "sushi roll"
+    },
+    {
+      "id": "food-tacos",
+      "description": "Three delicious beef tacos with fresh toppings",
+      "imageUrl": "https://images.unsplash.com/photo-1504544750208-dc0358e63f7f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHx0YWNvc3xlbnwwfHx8fDE3NzA4MDY0MjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "tacos"
+    },
+    {
+      "id": "avatar-1",
+      "description": "Avatar of a delivery person",
+      "imageUrl": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NzA3MDUyNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    }
+  ]
 }

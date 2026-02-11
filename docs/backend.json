@@ -26,7 +26,10 @@
           "description": "A hint for AI to find a relevant image"
         }
       },
-      "required": ["name", "cuisine"]
+      "required": [
+        "name",
+        "cuisine"
+      ]
     },
     "MenuItem": {
       "title": "Menu Item",
@@ -58,11 +61,130 @@
           "description": "Whether the menu item is currently available"
         }
       },
-      "required": ["name", "price", "available"]
+      "required": [
+        "name",
+        "price",
+        "available"
+      ]
+    },
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores user profile information",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "User's email"
+        },
+        "role": {
+          "type": "string",
+          "description": "User's role",
+          "enum": [
+            "customer",
+            "restaurant",
+            "delivery"
+          ]
+        },
+        "restaurantId": {
+          "type": "string",
+          "description": "The ID of the restaurant owned by the user (if role is 'restaurant')"
+        }
+      },
+      "required": [
+        "email",
+        "role"
+      ]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Represents a customer order",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "customer": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "In Progress",
+            "Delivered",
+            "Cancelled"
+          ]
+        },
+        "total": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "customer",
+        "status",
+        "total"
+      ]
+    },
+    "DeliveryJob": {
+      "title": "Delivery Job",
+      "description": "Represents a delivery job for an agent",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "orderId": {
+          "type": "string"
+        },
+        "restaurantName": {
+          "type": "string"
+        },
+        "restaurantAddress": {
+          "type": "string"
+        },
+        "customerAddress": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "restaurantCoords": {
+          "type": "object",
+          "properties": {
+            "lat": {
+              "type": "number"
+            },
+            "lng": {
+              "type": "number"
+            }
+          }
+        },
+        "customerCoords": {
+          "type": "object",
+          "properties": {
+            "lat": {
+              "type": "number"
+            },
+            "lng": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "required": [
+        "id",
+        "orderId",
+        "restaurantName",
+        "customerAddress",
+        "status"
+      ]
     }
   },
   "auth": {
-    "providers": []
+    "providers": [
+      "Email",
+      "Google"
+    ]
   },
   "firestore": {
     "/restaurants/{restaurantId}": {
@@ -76,6 +198,24 @@
         "$ref": "#/backend/entities/MenuItem"
       },
       "description": "Menu item documents for a specific restaurant"
+    },
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/backend/entities/UserProfile"
+      },
+      "description": "User profile documents"
+    },
+    "/restaurants/{restaurantId}/orders/{orderId}": {
+      "schema": {
+        "$ref": "#/backend/entities/Order"
+      },
+      "description": "Order documents for a specific restaurant"
+    },
+    "/deliveries/{deliveryId}": {
+      "schema": {
+        "$ref": "#/backend/entities/DeliveryJob"
+      },
+      "description": "Delivery job documents"
     }
   }
 }

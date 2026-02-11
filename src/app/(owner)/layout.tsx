@@ -1,4 +1,9 @@
+
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import {
   Bell,
   Home,
@@ -28,12 +33,38 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Logo } from "@/components/logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUser } from "@/firebase";
+import { getAuth, signOut } from "firebase/auth";
 
 export default function OwnerLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { user, profile, loading } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && (!user || profile?.role !== "restaurant")) {
+      router.push("/");
+    }
+  }, [user, profile, loading, router]);
+
+  const handleLogout = () => {
+    const auth = getAuth();
+    signOut(auth).then(() => {
+      router.push("/");
+    });
+  };
+
+  if (loading || !user || profile?.role !== "restaurant") {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
@@ -153,8 +184,8 @@ export default function OwnerLayout({
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon" className="rounded-full">
                 <Avatar>
-                  <AvatarImage src="https://picsum.photos/seed/owner/100/100" />
-                  <AvatarFallback>O</AvatarFallback>
+                  <AvatarImage src={user.photoURL || "https://picsum.photos/seed/owner/100/100"} />
+                  <AvatarFallback>{profile?.email?.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <span className="sr-only">Toggle user menu</span>
               </Button>
@@ -165,7 +196,7 @@ export default function OwnerLayout({
               <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuItem>Support</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild><Link href="/">Logout</Link></DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </header>

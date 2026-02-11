@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Map, AdvancedMarker, Pin } from "@vis.gl/react-google-maps";
 import {
   Card,
@@ -10,19 +11,70 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { MapProvider } from "@/components/map-provider";
-import { deliveryJobs } from "@/lib/data";
 import { Home, Utensils, Bike } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCollection, useFirestore } from "@/firebase";
+import { collection } from "firebase/firestore";
+import { Skeleton } from "@/components/ui/skeleton";
+
+interface DeliveryJob {
+  id: string;
+  orderId: string;
+  restaurantName: string;
+  restaurantAddress: string;
+  customerAddress: string;
+  status: string;
+  restaurantCoords: { lat: number; lng: number };
+  customerCoords: { lat: number; lng: number };
+}
 
 export default function DeliveriesPage() {
-  const [selectedJob, setSelectedJob] = useState(deliveryJobs[0]);
+  const firestore = useFirestore();
+  const deliveriesRef = useMemo(() => {
+    if (!firestore) return null;
+    return collection(firestore, "deliveries");
+  }, [firestore]);
+
+  const { data: deliveryJobs, loading } = useCollection<DeliveryJob>(deliveriesRef);
+  const [selectedJob, setSelectedJob] = useState<DeliveryJob | null>(deliveryJobs?.[0] || null);
+
+  if (loading) {
+    return (
+       <div className="grid grid-cols-1 lg:grid-cols-3 h-[calc(100vh-4rem)]">
+        <div className="lg:col-span-1 flex flex-col h-full bg-background border-r">
+          <div className="p-4 border-b">
+            <h2 className="text-xl font-bold font-headline">Delivery Jobs</h2>
+          </div>
+          <div className="flex-grow overflow-y-auto p-4 space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-4 w-1/4" />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="lg:col-span-2 relative bg-muted" />
+      </div>
+    )
+  }
+  
+  if (!deliveryJobs || deliveryJobs.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p>No delivery jobs available.</p>
+      </div>
+    );
+  }
+
+  const currentJob = selectedJob || deliveryJobs[0];
 
   const center = {
-    lat: (selectedJob.restaurantCoords.lat + selectedJob.customerCoords.lat) / 2,
-    lng: (selectedJob.restaurantCoords.lng + selectedJob.customerCoords.lng) / 2,
+    lat: (currentJob.restaurantCoords.lat + currentJob.customerCoords.lat) / 2,
+    lng: (currentJob.restaurantCoords.lng + currentJob.customerCoords.lng) / 2,
   };
 
   return (
@@ -37,7 +89,7 @@ export default function DeliveriesPage() {
               key={job.id}
               className={cn(
                 "p-4 border-b cursor-pointer hover:bg-muted/50",
-                selectedJob.id === job.id && "bg-muted"
+                currentJob.id === job.id && "bg-muted"
               )}
               onClick={() => setSelectedJob(job)}
             >
@@ -63,7 +115,7 @@ export default function DeliveriesPage() {
             disableDefaultUI={true}
           >
             <AdvancedMarker
-              position={selectedJob.restaurantCoords}
+              position={currentJob.restaurantCoords}
               title={"Restaurant"}
             >
               <Pin
@@ -75,7 +127,7 @@ export default function DeliveriesPage() {
               </Pin>
             </AdvancedMarker>
             <AdvancedMarker
-              position={selectedJob.customerCoords}
+              position={currentJob.customerCoords}
               title={"Customer"}
             >
               <Pin
@@ -91,16 +143,16 @@ export default function DeliveriesPage() {
         <Card className="absolute bottom-4 left-4 right-4 animate-in slide-in-from-bottom-10 duration-500">
           <CardHeader>
             <CardTitle>
-              Order #{selectedJob.orderId} - {selectedJob.restaurantName}
+              Order #{currentJob.orderId} - {currentJob.restaurantName}
             </CardTitle>
             <CardDescription>
-              From: {selectedJob.restaurantAddress}
+              From: {currentJob.restaurantAddress}
               <br />
-              To: {selectedJob.customerAddress}
+              To: {currentJob.customerAddress}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="font-bold text-lg text-primary">{selectedJob.status}</p>
+            <p className="font-bold text-lg text-primary">{currentJob.status}</p>
           </CardContent>
           <CardFooter className="flex justify-between">
             <Button variant="outline">Decline</Button>

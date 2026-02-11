@@ -1,4 +1,8 @@
+
+"use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,12 +14,39 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Logo } from "@/components/logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUser } from "@/firebase";
+import { getAuth, signOut } from "firebase/auth";
+
 
 export default function AgentLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { user, profile, loading } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && (!user || profile?.role !== "delivery")) {
+      router.push("/");
+    }
+  }, [user, profile, loading, router]);
+
+  const handleLogout = () => {
+    const auth = getAuth();
+    signOut(auth).then(() => {
+      router.push("/");
+    });
+  };
+
+  if (loading || !user || profile?.role !== "delivery") {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen w-full flex-col">
       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 z-50">
@@ -39,8 +70,8 @@ export default function AgentLayout({
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon" className="rounded-full">
                 <Avatar>
-                  <AvatarImage data-ai-hint="person portrait" src="https://picsum.photos/seed/agent/100/100" />
-                  <AvatarFallback>DA</AvatarFallback>
+                  <AvatarImage data-ai-hint="person portrait" src={user.photoURL || "https://picsum.photos/seed/agent/100/100"} />
+                  <AvatarFallback>{profile?.email?.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <span className="sr-only">Toggle user menu</span>
               </Button>
@@ -51,7 +82,7 @@ export default function AgentLayout({
               <DropdownMenuItem>Profile</DropdownMenuItem>
               <DropdownMenuItem>Earnings</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild><Link href="/">Logout</Link></DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

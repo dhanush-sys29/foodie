@@ -1,7 +1,11 @@
+
 "use client";
 
 import Image from "next/image";
+import { useMemo } from "react";
 import { File, PlusCircle } from "lucide-react";
+import { collection } from "firebase/firestore";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,11 +31,8 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { orders } from "@/lib/data";
-import { useCollection, useFirestore } from "@/firebase";
-import { collection } from "firebase/firestore";
-import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCollection, useFirestore, useUser } from "@/firebase";
 
 interface MenuItem {
   id: string;
@@ -42,18 +43,32 @@ interface MenuItem {
   imageHint: string;
 }
 
+interface Order {
+  id: string;
+  customer: string;
+  status: "In Progress" | "Delivered" | "Cancelled";
+  total: number;
+}
+
 export default function OwnerDashboard() {
-  const restaurantId = "1"; // Assuming owner of Pizza Palace (id: 1)
+  const { profile } = useUser();
+  const restaurantId = profile?.restaurantId;
   const firestore = useFirestore();
 
   const menuItemsRef = useMemo(() => {
-    if (!firestore) return null;
+    if (!firestore || !restaurantId) return null;
     return collection(firestore, "restaurants", restaurantId, "menuItems");
   }, [firestore, restaurantId]);
 
-  const { data: myMenuItems, loading } = useCollection<MenuItem>(menuItemsRef);
+  const ordersRef = useMemo(() => {
+    if (!firestore || !restaurantId) return null;
+    return collection(firestore, "restaurants", restaurantId, "orders");
+  }, [firestore, restaurantId]);
 
-  const menuContent = loading ? (
+  const { data: myMenuItems, loading: menuLoading } = useCollection<MenuItem>(menuItemsRef);
+  const { data: restaurantOrders, loading: ordersLoading } = useCollection<Order>(ordersRef);
+
+  const menuContent = menuLoading ? (
     <TableBody>
       {Array.from({ length: 3 }).map((_, i) => (
         <TableRow key={i}>
@@ -99,6 +114,43 @@ export default function OwnerDashboard() {
               defaultChecked={item.available}
               aria-label="Toggle availability"
             />
+          </TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
+  );
+
+  const ordersContent = ordersLoading ? (
+    <TableBody>
+      {Array.from({ length: 3 }).map((_, i) => (
+         <TableRow key={i}>
+            <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+            <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+            <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+            <TableCell className="text-right"><Skeleton className="h-5 w-16 ml-auto" /></TableCell>
+         </TableRow>
+      ))}
+    </TableBody>
+  ) : (
+    <TableBody>
+      {restaurantOrders?.map((order) => (
+        <TableRow key={order.id}>
+          <TableCell className="font-medium">{order.id}</TableCell>
+          <TableCell>{order.customer}</TableCell>
+          <TableCell>
+            <Badge
+              variant={
+                order.status === "Delivered" ? "secondary" : "default"
+              }
+              className={
+                order.status === "In Progress" ? "bg-blue-500" : ""
+              }
+            >
+              {order.status}
+            </Badge>
+          </TableCell>
+          <TableCell className="text-right">
+            ₹{order.total.toFixed(2)}
           </TableCell>
         </TableRow>
       ))}
@@ -154,7 +206,7 @@ export default function OwnerDashboard() {
                       Description
                     </TableHead>
                     <TableHead>
-                      <span className="sr-only">Actions</span>
+                      Available
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -193,29 +245,7 @@ export default function OwnerDashboard() {
                     <TableHead className="text-right">Total</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {orders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-medium">{order.id}</TableCell>
-                      <TableCell>{order.customer}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            order.status === "Delivered" ? "secondary" : "default"
-                          }
-                          className={
-                            order.status === "In Progress" ? "bg-blue-500" : ""
-                          }
-                        >
-                          {order.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        ₹{order.total.toFixed(2)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
+                {ordersContent}
               </Table>
             </CardContent>
           </Card>

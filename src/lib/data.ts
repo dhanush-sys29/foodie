@@ -51,36 +51,5 @@ export const menuItems: { [key: string]: { id: string; name: string; description
   ],
 };
 
-export const orders = [
-  { id: 'ORD-001', customer: 'John Doe', restaurant: 'Pizza Palace', status: 'Delivered', total: 1998, date: '2023-10-26' },
-  { id: 'ORD-002', customer: 'Jane Smith', restaurant: 'Burger Barn', status: 'Delivered', total: 1048, date: '2023-10-26' },
-  { id: 'ORD-003', customer: 'Peter Jones', restaurant: 'Pizza Palace', status: 'In Progress', total: 1348, date: '2023-10-27' },
-];
-
-export const deliveryJobs = [
-    {
-        id: 'JOB-001',
-        orderId: 'ORD-003',
-        restaurantName: 'Pizza Palace',
-        restaurantAddress: '123 Pizza St, Foodville',
-        customerName: 'Peter Jones',
-        customerAddress: '456 Home Ave, Foodville',
-        status: 'Pending Pickup',
-        restaurantCoords: { lat: 34.0522, lng: -118.2437 },
-        customerCoords: { lat: 34.0622, lng: -118.2537 },
-    },
-    {
-        id: 'JOB-002',
-        orderId: 'ORD-004',
-        restaurantName: 'Taco Town',
-        restaurantAddress: '789 Taco Rd, Foodville',
-        customerName: 'Mary Brown',
-        customerAddress: '101 Residence Blvd, Foodville',
-        status: 'Pending Pickup',
-        restaurantCoords: { lat: 34.0422, lng: -118.2337 },
-        customerCoords: { lat: 34.0555, lng: -118.2637 },
-    }
-];
-
 export const findRestaurantById = (id: string) => restaurants.find(r => r.id === id);
 export const getMenuItemsByRestaurantId = (id: string) => menuItems[id as keyof typeof menuItems] || [];

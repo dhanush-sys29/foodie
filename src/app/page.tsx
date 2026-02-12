@@ -2,16 +2,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,7 +83,6 @@ export default function LoginPage() {
         };
 
         if (userProfile.role === "restaurant") {
-          // For demo purposes, assign new restaurant owners to a default restaurant.
           userProfile.restaurantId = "1";
         }
 
@@ -109,7 +100,6 @@ export default function LoginPage() {
         await signInWithEmailAndPassword(auth, email, password);
         toast({ title: "Signed in successfully!" });
       }
-      // The useEffect will handle redirection.
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -168,15 +158,7 @@ export default function LoginPage() {
 
   const renderAuthForm = (formUserType: UserType) => {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Login as {formUserType}</CardTitle>
-          <CardDescription>
-            Enter your credentials to access your {formUserType.toLowerCase()}{" "}
-            account.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <div className="grid gap-4 pt-4">
           <div className="space-y-2">
             <Label htmlFor={`${formUserType}-email`}>Email</Label>
             <Input
@@ -198,41 +180,40 @@ export default function LoginPage() {
               disabled={loading}
             />
           </div>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-4">
-          <div className="w-full flex gap-2">
-            <Button
-              className="w-full"
-              onClick={() => handleAuthAction("signIn")}
-              disabled={loading}
-            >
-              {loading ? "Signing In..." : "Sign In"}
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => handleAuthAction("signUp")}
-              disabled={loading}
-            >
-              {loading ? "Signing Up..." : "Sign Up"}
-            </Button>
-          </div>
-          <div className="relative w-full">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
-          </div>
-          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading}>
-            <GoogleIcon className="mr-2 h-4 w-4" />
-            Sign in with Google
-          </Button>
-        </CardFooter>
-      </Card>
+          <div className="flex flex-col gap-4 mt-4">
+              <div className="w-full flex gap-2">
+                <Button
+                  className="w-full"
+                  onClick={() => handleAuthAction("signIn")}
+                  disabled={loading}
+                >
+                  {loading ? "Signing In..." : "Sign In"}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => handleAuthAction("signUp")}
+                  disabled={loading}
+                >
+                  {loading ? "Signing Up..." : "Sign Up"}
+                </Button>
+              </div>
+              <div className="relative w-full">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    Or continue with
+                  </span>
+                </div>
+              </div>
+              <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading}>
+                <GoogleIcon className="mr-2 h-4 w-4" />
+                Sign in with Google
+              </Button>
+        </div>
+      </div>
     );
   };
 
@@ -246,26 +227,49 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
-      <div className="mb-8">
-        <Logo />
+    <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
+       <div className="flex items-center justify-center p-6 sm:p-12">
+        <div className="mx-auto grid w-[350px] gap-6">
+          <div className="grid gap-2 text-center">
+             <div className="flex justify-center">
+                <Logo />
+             </div>
+            <h1 className="text-3xl font-bold font-headline">Welcome</h1>
+            <p className="text-balance text-muted-foreground">
+              Select your role to sign in or create an account.
+            </p>
+          </div>
+           <Tabs
+            defaultValue="customer"
+            className="w-full"
+            onValueChange={(value) => setUserType(value as UserType)}
+          >
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="customer">Customer</TabsTrigger>
+              <TabsTrigger value="restaurant">Restaurant</TabsTrigger>
+              <TabsTrigger value="delivery">Delivery</TabsTrigger>
+            </TabsList>
+            <TabsContent value="customer">{renderAuthForm("Customer")}</TabsContent>
+            <TabsContent value="restaurant">
+              {renderAuthForm("Restaurant")}
+            </TabsContent>
+            <TabsContent value="delivery">{renderAuthForm("Delivery")}</TabsContent>
+          </Tabs>
+        </div>
       </div>
-      <Tabs
-        defaultValue="customer"
-        className="w-full max-w-md"
-        onValueChange={(value) => setUserType(value as UserType)}
-      >
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="customer">Customer</TabsTrigger>
-          <TabsTrigger value="restaurant">Restaurant</TabsTrigger>
-          <TabsTrigger value="delivery">Delivery</TabsTrigger>
-        </TabsList>
-        <TabsContent value="customer">{renderAuthForm("Customer")}</TabsContent>
-        <TabsContent value="restaurant">
-          {renderAuthForm("Restaurant")}
-        </TabsContent>
-        <TabsContent value="delivery">{renderAuthForm("Delivery")}</TabsContent>
-      </Tabs>
+      <div className="hidden bg-muted lg:block relative">
+        <Image
+          src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+          alt="A table spread with delicious food"
+          fill
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute bottom-8 left-8 text-white p-4 rounded-lg bg-black/20 backdrop-blur-sm">
+            <h1 className="font-bold text-4xl font-headline">Your next meal, one tap away.</h1>
+            <p className="max-w-prose mt-2 text-lg">Discover local favorites and get them delivered to your doorstep, fast.</p>
+        </div>
+      </div>
     </div>
   );
 }

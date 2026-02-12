@@ -259,8 +259,8 @@ export default function LoginPage() {
       </div>
       <div className="hidden bg-muted lg:block relative">
         <Image
-          src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop"
-          alt="A luxurious restaurant interior"
+          src="https://images.unsplash.com/photo-1579738795534-a2133d130d31?q=80&w=1974&auto=format&fit=crop"
+          alt="A restaurant with warm, ambient lighting"
           fill
           className="object-cover"
         />

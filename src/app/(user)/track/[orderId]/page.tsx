@@ -157,7 +157,7 @@ export default function TrackOrderPage({ params }: { params: { orderId: string }
                         disableDefaultUI={true}
                     >
                         <AdvancedMarker position={delivery.restaurantCoords} title={"Restaurant"}>
-                            <Pin background={'#4B5563'} glyphColor={'#FFFFFF'} borderColor={'#4B5563'}>
+                            <Pin background={'#B45309'} glyphColor={'#FFFFFF'} borderColor={'#B45309'}>
                                 <Utensils className="w-6 h-6" />
                             </Pin>
                         </AdvancedMarker>
@@ -169,7 +169,7 @@ export default function TrackOrderPage({ params }: { params: { orderId: string }
                             </AdvancedMarker>
                         )}
                         <AdvancedMarker position={delivery.customerCoords} title={"Your Location"}>
-                             <Pin background={'#3498DB'} glyphColor={'#FFFFFF'} borderColor={'#3498DB'}>
+                             <Pin background={'#F59E0B'} glyphColor={'#FFFFFF'} borderColor={'#F59E0B'}>
                                 <Home className="w-6 h-6" />
                             </Pin>
                         </AdvancedMarker>

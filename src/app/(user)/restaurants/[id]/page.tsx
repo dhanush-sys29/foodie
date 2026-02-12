@@ -124,7 +124,7 @@ export default function RestaurantPage({ params }: { params: { id: string } }) {
         <CardContent className="p-6">
           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
             <div className="flex items-center">
-              <Star className="w-4 h-4 mr-1 text-yellow-400 fill-yellow-400" />
+              <Star className="w-4 h-4 mr-1 text-orange-500 fill-orange-500" />
               <span>{restaurant.rating}</span>
             </div>
             <Separator orientation="vertical" className="h-4" />

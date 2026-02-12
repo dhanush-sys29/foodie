@@ -135,9 +135,9 @@ export default function DeliveriesPage() {
               title={"Restaurant"}
             >
               <Pin
-                background={"#4B5563"}
+                background={"#D97706"}
                 glyphColor={"#FFFFFF"}
-                borderColor={"#4B5563"}
+                borderColor={"#D97706"}
               >
                 <Utensils className="w-6 h-6" />
               </Pin>
@@ -147,9 +147,9 @@ export default function DeliveriesPage() {
               title={"Customer"}
             >
               <Pin
-                background={"#3498DB"}
+                background={"#F97316"}
                 glyphColor={"#FFFFFF"}
-                borderColor={"#3498DB"}
+                borderColor={"#F97316"}
               >
                 <Home className="w-6 h-6" />
               </Pin>

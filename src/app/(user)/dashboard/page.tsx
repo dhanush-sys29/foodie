@@ -91,7 +91,7 @@ export default function Dashboard() {
               </CardContent>
               <CardFooter className="flex justify-between p-4 pt-0">
                 <Badge variant="outline">
-                  <Star className="w-4 h-4 mr-1 text-yellow-400 fill-yellow-400" />
+                  <Star className="w-4 h-4 mr-1 text-orange-500 fill-orange-500" />
                   {restaurant.rating}
                 </Badge>
               </CardFooter>

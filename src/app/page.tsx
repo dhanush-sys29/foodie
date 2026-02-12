@@ -146,10 +146,22 @@ export default function LoginPage() {
             toast({ title: "Signed in successfully!" });
         }
     } catch (error: any) {
+        let description = error.message;
+        switch (error.code) {
+          case 'auth/popup-closed-by-user':
+            description = "The sign-in popup was closed before completing the sign-in. Please try again.";
+            break;
+          case 'auth/popup-blocked':
+            description = "The sign-in popup was blocked by your browser. Please allow popups for this site and try again.";
+            break;
+          case 'auth/unauthorized-domain':
+            description = "This domain is not authorized for Google Sign-In. Please check your Firebase console configuration.";
+            break;
+        }
         toast({
             variant: "destructive",
             title: "Google Sign-In Error",
-            description: error.message,
+            description,
         });
     } finally {
         setLoading(false);

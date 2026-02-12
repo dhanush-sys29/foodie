@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -56,6 +57,24 @@ export default function Dashboard() {
               </CardFooter>
             </Card>
           ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!restaurants || restaurants.length === 0) {
+    return (
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight font-headline mb-6">
+          Restaurants Near You
+        </h1>
+        <div className="flex flex-col items-center justify-center text-center bg-background p-10 rounded-lg border-2 border-dashed">
+          <p className="text-lg font-semibold text-muted-foreground">
+            No restaurants found.
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Check back later for new restaurants in your area.
+          </p>
         </div>
       </div>
     );

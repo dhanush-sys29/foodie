@@ -259,15 +259,15 @@ export default function LoginPage() {
       </div>
       <div className="hidden bg-muted lg:block relative">
         <Image
-          src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-          alt="A table spread with delicious food"
+          src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1974&auto=format&fit=crop"
+          alt="A luxurious restaurant interior"
           fill
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <div className="absolute bottom-8 left-8 text-white p-4 rounded-lg bg-black/20 backdrop-blur-sm">
-            <h1 className="font-bold text-4xl font-headline">Your next meal, one tap away.</h1>
-            <p className="max-w-prose mt-2 text-lg">Discover local favorites and get them delivered to your doorstep, fast.</p>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+        <div className="absolute bottom-8 left-8 text-white p-6 rounded-lg bg-black/30 backdrop-blur-md">
+            <h1 className="font-bold text-4xl font-headline">Experience culinary excellence.</h1>
+            <p className="max-w-prose mt-2 text-lg">From fine dining to casual eats, discover the best your city has to offer.</p>
         </div>
       </div>
     </div>

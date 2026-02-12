@@ -2,12 +2,33 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { File, PlusCircle } from "lucide-react";
-import { collection, doc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -35,6 +56,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useCollection, useFirestore, useUser } from "@/firebase";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 interface MenuItem {
   id: string;
@@ -47,15 +70,24 @@ interface MenuItem {
 
 interface Order {
   id: string;
-  customer: string;
-  status: "In Progress" | "Delivered" | "Cancelled";
+  customerName: string;
+  status: "Pending" | "In Progress" | "Delivered" | "Cancelled";
   total: number;
 }
+
+const menuItemSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().min(1, "Description is required"),
+  price: z.coerce.number().positive("Price must be a positive number"),
+  imageHint: z.string().min(1, "Image hint is required"),
+});
 
 export default function OwnerDashboard() {
   const { profile } = useUser();
   const restaurantId = profile?.restaurantId;
   const firestore = useFirestore();
+  const { toast } = useToast();
+  const [isDialogOpen, setDialogOpen] = useState(false);
 
   const menuItemsRef = useMemo(() => {
     if (!firestore || !restaurantId) return null;
@@ -70,6 +102,39 @@ export default function OwnerDashboard() {
   const { data: myMenuItems, loading: menuLoading } = useCollection<MenuItem>(menuItemsRef);
   const { data: restaurantOrders, loading: ordersLoading } = useCollection<Order>(ordersRef);
 
+  const form = useForm<z.infer<typeof menuItemSchema>>({
+    resolver: zodResolver(menuItemSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      price: 0,
+      imageHint: "",
+    },
+  });
+
+  const onSubmit = async (values: z.infer<typeof menuItemSchema>) => {
+    if (!menuItemsRef) return;
+    try {
+      await addDoc(menuItemsRef, {
+        ...values,
+        available: true,
+        createdAt: serverTimestamp(),
+      });
+      toast({ title: "Success", description: "Menu item added successfully." });
+      form.reset();
+      setDialogOpen(false);
+    } catch (error: any) {
+        toast({ variant: "destructive", title: "Error", description: "Could not add menu item." });
+        const permissionError = new FirestorePermissionError({
+            path: menuItemsRef.path,
+            operation: 'create',
+            requestResourceData: values,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+    }
+  };
+
+
   const toggleAvailability = (itemId: string, currentStatus: boolean) => {
     if (!firestore || !restaurantId) return;
     const itemRef = doc(firestore, "restaurants", restaurantId, "menuItems", itemId);
@@ -83,6 +148,21 @@ export default function OwnerDashboard() {
             errorEmitter.emit('permission-error', permissionError);
         });
   };
+
+  const getStatusVariant = (status: Order["status"]) => {
+    switch (status) {
+        case "Delivered":
+            return "secondary";
+        case "In Progress":
+            return "default";
+        case "Pending":
+            return "destructive";
+        case "Cancelled":
+            return "outline";
+        default:
+            return "default";
+    }
+  }
 
   const menuContent = menuLoading ? (
     <TableBody>
@@ -152,17 +232,10 @@ export default function OwnerDashboard() {
     <TableBody>
       {restaurantOrders?.map((order) => (
         <TableRow key={order.id}>
-          <TableCell className="font-medium">{order.id}</TableCell>
-          <TableCell>{order.customer}</TableCell>
+          <TableCell className="font-medium">{order.id.substring(0,7)}...</TableCell>
+          <TableCell>{order.customerName}</TableCell>
           <TableCell>
-            <Badge
-              variant={
-                order.status === "Delivered" ? "secondary" : "default"
-              }
-              className={
-                order.status === "In Progress" ? "bg-blue-500" : ""
-              }
-            >
+            <Badge variant={getStatusVariant(order.status)}>
               {order.status}
             </Badge>
           </TableCell>
@@ -194,12 +267,86 @@ export default function OwnerDashboard() {
                 Export
               </span>
             </Button>
-            <Button size="sm" className="h-8 gap-1">
-              <PlusCircle className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Add Item
-              </span>
-            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" className="h-8 gap-1">
+                  <PlusCircle className="h-3.5 w-3.5" />
+                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                    Add Item
+                  </span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add New Menu Item</DialogTitle>
+                  <DialogDescription>
+                    Fill in the details below to add a new item to your menu.
+                  </DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. Margherita Pizza" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="e.g. Classic pizza with tomato, mozzarella, and basil." {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="price"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Price (₹)</FormLabel>
+                          <FormControl>
+                            <Input type="number" step="0.01" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="imageHint"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Image Hint</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. margherita pizza" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+                        <Button type="submit" disabled={form.formState.isSubmitting}>
+                            {form.formState.isSubmitting ? "Adding..." : "Add Item"}
+                        </Button>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
         <TabsContent value="menu">

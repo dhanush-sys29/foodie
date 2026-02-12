@@ -100,29 +100,68 @@
       "description": "Represents a customer order",
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string"
+        "customerId": {
+          "type": "string",
+          "description": "The UID of the customer who placed the order."
         },
-        "customer": {
-          "type": "string"
+        "customerName": {
+          "type": "string",
+          "description": "The display name of the customer."
         },
         "status": {
           "type": "string",
           "enum": [
+            "Pending",
             "In Progress",
             "Delivered",
             "Cancelled"
-          ]
+          ],
+          "description": "The current status of the order."
         },
         "total": {
-          "type": "number"
+          "type": "number",
+          "description": "The total price of the order."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the order was created."
+        },
+        "items": {
+          "type": "array",
+          "description": "List of items in the order.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "itemId": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "price": {
+                "type": "number"
+              },
+              "quantity": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "itemId",
+              "name",
+              "price",
+              "quantity"
+            ]
+          }
         }
       },
       "required": [
-        "id",
-        "customer",
+        "customerId",
+        "customerName",
         "status",
-        "total"
+        "total",
+        "createdAt",
+        "items"
       ]
     },
     "DeliveryJob": {

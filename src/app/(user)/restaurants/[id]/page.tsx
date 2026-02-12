@@ -16,6 +16,7 @@ import { useDoc, useCollection, useFirestore } from "@/firebase";
 import { collection, doc } from "firebase/firestore";
 import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCart } from "@/context/cart-context";
 
 interface Restaurant {
   id: string;
@@ -36,6 +37,7 @@ interface MenuItem {
 
 export default function RestaurantPage({ params }: { params: { id: string } }) {
   const firestore = useFirestore();
+  const { addToCart } = useCart();
 
   const restaurantRef = useMemo(() => {
     if (!firestore) return null;
@@ -87,6 +89,18 @@ export default function RestaurantPage({ params }: { params: { id: string } }) {
   if (!restaurant) {
     notFound();
   }
+
+  const handleAddToCart = (item: MenuItem) => {
+    if (restaurant) {
+      addToCart({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: 1,
+        restaurant: { id: restaurant.id, name: restaurant.name },
+      });
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -148,7 +162,7 @@ export default function RestaurantPage({ params }: { params: { id: string } }) {
                 <p className="text-lg font-semibold">
                   ₹{item.price.toFixed(2)}
                 </p>
-                <Button disabled={!item.available} size="sm">
+                <Button disabled={!item.available} size="sm" onClick={() => handleAddToCart(item)}>
                   {item.available ? (
                     <>
                       <PlusCircle className="mr-2 h-4 w-4" /> Add

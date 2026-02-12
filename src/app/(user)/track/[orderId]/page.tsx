@@ -20,7 +20,7 @@ interface DeliveryJob {
     restaurantName: string;
     restaurantAddress: string;
     customerAddress: string;
-    status: string;
+    status: "Pending" | "Accepted" | "Picked Up" | "On the way" | "Delivered";
     restaurantCoords: { lat: number; lng: number };
     customerCoords: { lat: number; lng: number };
 }
@@ -95,7 +95,7 @@ export default function TrackOrderPage({ params }: { params: { orderId: string }
     }
 
     useEffect(() => {
-        if (!delivery) return;
+        if (!delivery || delivery.status !== "Picked Up") return;
 
         setAgentPosition(delivery.restaurantCoords);
         const interval = setInterval(() => {
@@ -161,7 +161,7 @@ export default function TrackOrderPage({ params }: { params: { orderId: string }
                                 <Utensils className="w-6 h-6" />
                             </Pin>
                         </AdvancedMarker>
-                        {agentPosition && (
+                        {agentPosition && delivery.status === 'Picked Up' && (
                              <AdvancedMarker position={agentPosition} title={"Delivery Agent"}>
                                 <Pin background={'#FF7800'} glyphColor={'#FFFFFF'} borderColor={'#FF7800'}>
                                     <Bike className="w-6 h-6" />
@@ -178,7 +178,7 @@ export default function TrackOrderPage({ params }: { params: { orderId: string }
             </div>
             <Card className="md:col-span-1 animate-in fade-in duration-500 delay-150">
                 <CardHeader>
-                    <CardTitle>Tracking Order #{params.orderId}</CardTitle>
+                    <CardTitle>Tracking Order #{params.orderId.substring(0, 7)}</CardTitle>
                     <CardDescription>From {delivery.restaurantName}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">

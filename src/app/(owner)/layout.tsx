@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
   Bell,
   Home,
@@ -33,8 +33,15 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Logo } from "@/components/logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useUser } from "@/firebase";
+import { useUser, useFirestore, useCollection } from "@/firebase";
 import { getAuth, signOut } from "firebase/auth";
+import { collection, query, where } from "firebase/firestore";
+
+interface Order {
+  id: string;
+  status: string;
+}
+
 
 export default function OwnerLayout({
   children,
@@ -43,6 +50,18 @@ export default function OwnerLayout({
 }) {
   const { user, profile, loading } = useUser();
   const router = useRouter();
+  const firestore = useFirestore();
+
+  const ordersRef = useMemo(() => {
+    if (!firestore || !profile?.restaurantId) return null;
+    return collection(firestore, "restaurants", profile.restaurantId, "orders");
+  }, [firestore, profile?.restaurantId]);
+  
+  const { data: orders } = useCollection<Order>(ordersRef);
+  const pendingOrderCount = useMemo(() => {
+    return orders?.filter(order => order.status === "Pending").length || 0;
+  }, [orders]);
+
 
   useEffect(() => {
     if (!loading && (!user || profile?.role !== "restaurant")) {
@@ -93,9 +112,11 @@ export default function OwnerLayout({
               >
                 <Package className="h-4 w-4" />
                 Orders
-                <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                  6
-                </Badge>
+                {pendingOrderCount > 0 && (
+                  <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
+                    {pendingOrderCount}
+                  </Badge>
+                )}
               </Link>
               <Link
                 href="#"
@@ -153,7 +174,7 @@ export default function OwnerLayout({
                   <Logo />
                 </Link>
                 <Link
-                  href="#"
+                  href="/manage"
                   className="mx-[-0.65rem] flex items-center gap-4 rounded-xl bg-muted px-3 py-2 text-foreground hover:text-foreground"
                 >
                   <Home className="h-5 w-5" />
@@ -165,9 +186,11 @@ export default function OwnerLayout({
                 >
                   <Package className="h-5 w-5" />
                   Orders
-                  <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                    6
-                  </Badge>
+                  {pendingOrderCount > 0 && (
+                    <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
+                      {pendingOrderCount}
+                    </Badge>
+                  )}
                 </Link>
                 <Link
                   href="#"

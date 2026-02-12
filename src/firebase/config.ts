@@ -13,10 +13,10 @@
 // sign-in providers in your Firebase project's Authentication section.
 // =================================================================
 export const firebaseConfig = {
-  apiKey: 'REPLACE_WITH_YOUR_API_KEY',
-  authDomain: 'REPLACE_WITH_YOUR_AUTH_DOMAIN',
-  projectId: 'REPLACE_WITH_YOUR_PROJECT_ID',
-  storageBucket: 'REPLACE_WITH_YOUR_STORAGE_BUCKET',
-  messagingSenderId: 'REPLACE_WITH_YOUR_MESSAGING_SENDER_ID',
-  appId: 'REPLACE_WITH_YOUR_APP_ID',
+  apiKey: "AIzaSyABsTY5MgtDM02wfwRn1qBKdfyl4p4WbZ8",
+  authDomain: "studio-9788388626-8a0b8.firebaseapp.com",
+  projectId: "studio-9788388626-8a0b8",
+  storageBucket: "studio-9788388626-8a0b8.firebasestorage.app",
+  messagingSenderId: "684547745725",
+  appId: "1:684547745725:web:7fa0534c259a0cbe1054d4"
 };

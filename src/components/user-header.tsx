@@ -27,9 +27,13 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Logo } from "./logo";
 import { useUser } from "@/firebase";
+import { useCart } from "@/context/cart-context";
+
 
 export function UserHeader() {
   const { user, profile } = useUser();
+  const { getCartCount, setCartOpen } = useCart();
+  const cartCount = getCartCount();
   const router = useRouter();
   const handleLogout = () => {
     const auth = getAuth();
@@ -98,10 +102,12 @@ export function UserHeader() {
             />
           </div>
         </form>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="icon" className="relative" onClick={() => setCartOpen(true)}>
             <ShoppingCart className="h-5 w-5"/>
             <span className="sr-only">Shopping Cart</span>
-            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">3</span>
+            {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">{cartCount}</span>
+            )}
         </Button>
         { user ? (
           <DropdownMenu>

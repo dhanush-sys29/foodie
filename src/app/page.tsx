@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,24 +26,15 @@ import {
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 type UserType = "Customer" | "Restaurant" | "Delivery";
-
-const quotes = [
-    { quote: "Laughter is brightest where food is best.", author: "Irish Proverb" },
-    { quote: "One cannot think well, love well, sleep well, if one has not dined well.", author: "Virginia Woolf" },
-    { quote: "Food is symbolic of love when words are inadequate.", author: "Alan D. Wolfelt" },
-    { quote: "The only thing I like better than talking about food is eating.", author: "John Walters" },
-    { quote: "Cooking is like love. It should be entered into with abandon or not at all.", author: "Harriet Van Horne" },
-];
-
 
 export default function LoginPage() {
   const [userType, setUserType] = useState<UserType>("Customer");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [currentQuote, setCurrentQuote] = useState(quotes[0]);
   const router = useRouter();
   const { toast } = useToast();
   const auth = useAuth();
@@ -51,9 +42,6 @@ export default function LoginPage() {
   const { user, profile, loading: userLoading } = useUser();
 
   useEffect(() => {
-    // Select a random quote on client-side mount
-    setCurrentQuote(quotes[Math.floor(Math.random() * quotes.length)]);
-
     if (!userLoading && user && profile) {
       switch (profile.role) {
         case "customer":
@@ -168,68 +156,6 @@ export default function LoginPage() {
     }
   };
 
-
-  const renderAuthForm = (formUserType: UserType) => {
-    return (
-      <div className="grid gap-4 pt-4">
-          <div className="space-y-2">
-            <Label htmlFor={`${formUserType}-email`}>Email</Label>
-            <Input
-              id={`${formUserType}-email`}
-              type="email"
-              placeholder="m@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor={`${formUserType}-password`}>Password</Label>
-            <Input
-              id={`${formUserType}-password`}
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-            />
-          </div>
-          <div className="flex flex-col gap-4 mt-4">
-              <div className="w-full flex gap-2">
-                <Button
-                  className="w-full"
-                  onClick={() => handleAuthAction("signIn")}
-                  disabled={loading}
-                >
-                  {loading ? "Signing In..." : "Sign In"}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => handleAuthAction("signUp")}
-                  disabled={loading}
-                >
-                  {loading ? "Signing Up..." : "Sign Up"}
-                </Button>
-              </div>
-              <div className="relative w-full">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    Or continue with
-                  </span>
-                </div>
-              </div>
-              <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading}>
-                <GoogleIcon className="mr-2 h-4 w-4" />
-                Sign in with Google
-              </Button>
-        </div>
-      </div>
-    );
-  };
-
   if (userLoading || (user && profile)) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
@@ -240,52 +166,98 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
-       <div className="flex items-center justify-center p-6 sm:p-12">
-        <div className="mx-auto grid w-[350px] gap-6">
-          <div className="grid gap-2 text-center">
-             <div className="flex justify-center">
-                <Logo />
-             </div>
-            <h1 className="text-3xl font-bold font-headline">Welcome</h1>
-            <p className="text-balance text-muted-foreground">
-              Select your role to sign in or create an account.
-            </p>
-          </div>
-           <Tabs
-            defaultValue="customer"
-            className="w-full"
-            onValueChange={(value) => setUserType(value as UserType)}
-          >
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="customer">Customer</TabsTrigger>
-              <TabsTrigger value="restaurant">Restaurant</TabsTrigger>
-              <TabsTrigger value="delivery">Delivery</TabsTrigger>
-            </TabsList>
-            <TabsContent value="customer">{renderAuthForm("Customer")}</TabsContent>
-            <TabsContent value="restaurant">
-              {renderAuthForm("Restaurant")}
-            </TabsContent>
-            <TabsContent value="delivery">{renderAuthForm("Delivery")}</TabsContent>
-          </Tabs>
-        </div>
-      </div>
-      <div className="hidden bg-muted lg:block relative">
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-background text-foreground">
         <Image
-          src="https://images.unsplash.com/photo-1598103442349-0a06135b9d36?q=80&w=1974&auto=format&fit=crop"
-          alt="Artistic display of colorful spices"
+          src="https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=2070&auto=format&fit=crop"
+          alt="A delicious spread of food ingredients"
           fill
-          className="object-cover"
-          data-ai-hint="colorful spices"
+          className="object-cover z-0"
+          data-ai-hint="food ingredients"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-        <div className="absolute bottom-8 left-8 text-white p-6 rounded-lg bg-black/30 backdrop-blur-md max-w-xl">
-             <blockquote className="text-2xl font-semibold italic text-white/90">
-                <p>"{currentQuote.quote}"</p>
-            </blockquote>
-            <cite className="block text-right mt-2 text-lg not-italic text-white/70">— {currentQuote.author}</cite>
+        <div className="absolute inset-0 bg-black/60 z-0" />
+        
+        <div className="relative z-10 w-full max-w-md p-4">
+            <div className="flex justify-center mb-8">
+                <Logo />
+            </div>
+            <Card className="bg-background/80 backdrop-blur-sm">
+                <CardHeader className="text-center">
+                    <CardTitle className="text-2xl font-bold font-headline">Join Foodie</CardTitle>
+                    <CardDescription>Sign in or create an account to get started.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Tabs
+                        defaultValue="customer"
+                        className="w-full"
+                        onValueChange={(value) => setUserType(value as UserType)}
+                    >
+                        <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="customer">Customer</TabsTrigger>
+                        <TabsTrigger value="restaurant">Restaurant</TabsTrigger>
+                        <TabsTrigger value="delivery">Delivery</TabsTrigger>
+                        </TabsList>
+                    </Tabs>
+                    <div className="grid gap-4 pt-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input
+                            id="email"
+                            type="email"
+                            placeholder="m@example.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            disabled={loading}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="password">Password</Label>
+                            <Input
+                            id="password"
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            disabled={loading}
+                            />
+                        </div>
+                        <div className="flex flex-col gap-4 mt-4">
+                            <div className="w-full flex gap-2">
+                                <Button
+                                className="w-full"
+                                onClick={() => handleAuthAction("signIn")}
+                                disabled={loading}
+                                >
+                                {loading ? "Signing In..." : "Sign In"}
+                                </Button>
+                                <Button
+                                variant="secondary"
+                                className="w-full"
+                                onClick={() => handleAuthAction("signUp")}
+                                disabled={loading}
+                                >
+                                {loading ? "Signing Up..." : "Sign Up"}
+                                </Button>
+                            </div>
+                            <div className="relative w-full">
+                                <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t" />
+                                </div>
+                                <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-background/80 px-2 text-muted-foreground">
+                                    Or continue with
+                                </span>
+                                </div>
+                            </div>
+                            <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading}>
+                                <GoogleIcon className="mr-2 h-4 w-4" />
+                                Sign in with Google
+                            </Button>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
-      </div>
     </div>
   );
 }
+
+    

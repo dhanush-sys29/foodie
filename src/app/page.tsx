@@ -26,7 +26,7 @@ import {
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 
 type UserType = "Customer" | "Restaurant" | "Delivery";
 
@@ -182,7 +182,7 @@ export default function LoginPage() {
             </div>
             <Card className="bg-background/80 backdrop-blur-sm">
                 <CardHeader className="text-center">
-                    <CardTitle className="text-2xl font-bold font-headline">Join Foodie</CardTitle>
+                    <h2 className="text-2xl font-bold font-headline">Join Foodie</h2>
                     <CardDescription>Sign in or create an account to get started.</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -253,11 +253,14 @@ export default function LoginPage() {
                             </Button>
                         </div>
                     </div>
+                    {loading && (
+                        <div className="sr-only" aria-live="polite">
+                            Processing your request...
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         </div>
     </div>
   );
 }
-
-    

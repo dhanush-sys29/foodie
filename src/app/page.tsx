@@ -29,11 +29,21 @@ import { FirestorePermissionError } from "@/firebase/errors";
 
 type UserType = "Customer" | "Restaurant" | "Delivery";
 
+const quotes = [
+    { quote: "Laughter is brightest where food is best.", author: "Irish Proverb" },
+    { quote: "One cannot think well, love well, sleep well, if one has not dined well.", author: "Virginia Woolf" },
+    { quote: "Food is symbolic of love when words are inadequate.", author: "Alan D. Wolfelt" },
+    { quote: "The only thing I like better than talking about food is eating.", author: "John Walters" },
+    { quote: "Cooking is like love. It should be entered into with abandon or not at all.", author: "Harriet Van Horne" },
+];
+
+
 export default function LoginPage() {
   const [userType, setUserType] = useState<UserType>("Customer");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [currentQuote, setCurrentQuote] = useState(quotes[0]);
   const router = useRouter();
   const { toast } = useToast();
   const auth = useAuth();
@@ -41,6 +51,9 @@ export default function LoginPage() {
   const { user, profile, loading: userLoading } = useUser();
 
   useEffect(() => {
+    // Select a random quote on client-side mount
+    setCurrentQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+
     if (!userLoading && user && profile) {
       switch (profile.role) {
         case "customer":
@@ -259,15 +272,18 @@ export default function LoginPage() {
       </div>
       <div className="hidden bg-muted lg:block relative">
         <Image
-          src="https://images.unsplash.com/photo-1579738795534-a2133d130d31?q=80&w=1974&auto=format&fit=crop"
-          alt="A restaurant with warm, ambient lighting"
+          src="https://images.unsplash.com/photo-1598103442349-0a06135b9d36?q=80&w=1974&auto=format&fit=crop"
+          alt="Artistic display of colorful spices"
           fill
           className="object-cover"
+          data-ai-hint="colorful spices"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-        <div className="absolute bottom-8 left-8 text-white p-6 rounded-lg bg-black/30 backdrop-blur-md">
-            <h1 className="font-bold text-4xl font-headline">Experience culinary excellence.</h1>
-            <p className="max-w-prose mt-2 text-lg">From fine dining to casual eats, discover the best your city has to offer.</p>
+        <div className="absolute bottom-8 left-8 text-white p-6 rounded-lg bg-black/30 backdrop-blur-md max-w-xl">
+             <blockquote className="text-2xl font-semibold italic text-white/90">
+                <p>"{currentQuote.quote}"</p>
+            </blockquote>
+            <cite className="block text-right mt-2 text-lg not-italic text-white/70">— {currentQuote.author}</cite>
         </div>
       </div>
     </div>

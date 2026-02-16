@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
+import { useParams } from 'next/navigation';
 import {
   Map,
   AdvancedMarker,
@@ -77,8 +78,9 @@ function LoadingSkeleton() {
     );
 }
 
-export default function TrackOrderPage({ params }: { params: { orderId: string } }) {
-    const { orderId } = params;
+export default function TrackOrderPage() {
+    const params = useParams();
+    const orderId = params.orderId as string;
     const firestore = useFirestore();
     const deliveryQuery = useMemo(() => {
         if (!firestore) return null;

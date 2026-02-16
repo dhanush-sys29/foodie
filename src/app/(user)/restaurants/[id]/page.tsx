@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import { Star, Clock, PlusCircle } from "lucide-react";
 import {
   Card,
@@ -35,8 +35,9 @@ interface MenuItem {
   imageHint: string;
 }
 
-export default function RestaurantPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function RestaurantPage() {
+  const params = useParams();
+  const id = params.id as string;
   const firestore = useFirestore();
   const { addToCart } = useCart();
 

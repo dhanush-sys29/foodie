@@ -24,33 +24,37 @@ export function useUser() {
       return;
     }
   
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
-      setLoading(false); // 🔥 ALWAYS set loading here
+      if (!firebaseUser) {
+        // If no user, we are done loading.
+        setProfile(null);
+        setLoading(false);
+      }
     });
   
-    return () => unsubscribe();
-  }, []); // 🔥 IMPORTANT: empty dependency array
+    return () => unsubscribeAuth();
+  }, [auth]);
 
   useEffect(() => {
-    if (!user) {
-      setProfile(null);
+    // If we have no user, the auth useEffect will have already set loading to false.
+    if (!user || !firestore) {
       return;
     }
   
-    if (!firestore) return;
-  
     const profileRef = doc(firestore, "users", user.uid);
   
-    const unsubscribe = onSnapshot(profileRef, (docSnap) => {
+    const unsubscribeProfile = onSnapshot(profileRef, (docSnap) => {
       if (docSnap.exists()) {
         setProfile(docSnap.data() as UserProfile);
       } else {
         setProfile(null);
       }
+      // Once we have a snapshot (or know it doesn't exist), we are done loading.
+      setLoading(false);
     });
   
-    return () => unsubscribe();
+    return () => unsubscribeProfile();
   }, [user, firestore]);
   
 

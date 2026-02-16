@@ -1,11 +1,10 @@
-
 "use client";
 
 import { useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { useDoc, useFirestore, useUser } from "@/firebase";
 import { Button } from "@/components/ui/button";
 import {
@@ -74,7 +73,7 @@ export default function SettingsPage() {
   const onSubmit = (values: z.infer<typeof restaurantSettingsSchema>) => {
     if (!restaurantRef) return;
     
-    updateDoc(restaurantRef, values)
+    setDoc(restaurantRef, values, { merge: true })
       .then(() => {
         toast({
           title: "Settings Saved",
@@ -89,7 +88,7 @@ export default function SettingsPage() {
         });
         const permissionError = new FirestorePermissionError({
             path: restaurantRef.path,
-            operation: 'update',
+            operation: 'write',
             requestResourceData: values,
         });
         errorEmitter.emit('permission-error', permissionError);

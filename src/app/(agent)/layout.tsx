@@ -100,8 +100,8 @@ export default function AgentLayout({
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Earnings</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/agent/profile')}>Profile</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/agent/earnings')}>Earnings</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
             </DropdownMenuContent>

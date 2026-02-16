@@ -10,10 +10,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MapProvider } from '@/components/map-provider';
-import { Bike, Utensils, Home } from 'lucide-react';
+import { Bike, Utensils, Home, Package } from 'lucide-react';
 import { useCollection, useFirestore } from '@/firebase';
 import { collection, query, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
+
+type DeliveryStatus = "Pending" | "Accepted" | "Picked Up" | "Delivered" | "Declined";
 
 interface DeliveryJob {
     id: string;
@@ -21,17 +23,17 @@ interface DeliveryJob {
     restaurantName: string;
     restaurantAddress: string;
     customerAddress: string;
-    status: "Pending" | "Accepted" | "Picked Up" | "On the way" | "Delivered";
+    status: DeliveryStatus;
     restaurantCoords: { lat: number; lng: number };
     customerCoords: { lat: number; lng: number };
 }
 
 
-const OrderStatus = ({ status, progress }: { status: string, progress: number }) => (
+const OrderStatus = ({ status, progress, estimatedTime }: { status: string, progress: number, estimatedTime: number }) => (
     <div className="space-y-2">
-        <p className="font-medium">{status}</p>
+        <p className="font-medium text-lg">{status}</p>
         <Progress value={progress} className="w-full" />
-        <p className="text-sm text-muted-foreground">Estimated Arrival: 15 minutes</p>
+        <p className="text-sm text-muted-foreground">Estimated Arrival: {estimatedTime} minutes</p>
     </div>
 )
 
@@ -42,8 +44,8 @@ const DeliveryAgentInfo = () => (
             <AvatarFallback>DA</AvatarFallback>
         </Avatar>
         <div>
-            <p className="font-medium">David Lee</p>
-            <p className="text-sm text-muted-foreground">Your delivery agent</p>
+            <p className="font-medium">Your Delivery Agent</p>
+            <p className="text-sm text-muted-foreground">Is on the way!</p>
         </div>
     </div>
 )
@@ -82,6 +84,7 @@ export default function TrackOrderPage() {
     const params = useParams();
     const orderId = params.orderId as string;
     const firestore = useFirestore();
+
     const deliveryQuery = useMemo(() => {
         if (!firestore) return null;
         return query(collection(firestore, "deliveries"), where("orderId", "==", orderId))
@@ -98,7 +101,12 @@ export default function TrackOrderPage() {
     }
 
     useEffect(() => {
-        if (!delivery || delivery.status !== "Picked Up") return;
+        if (!delivery || delivery.status !== "Picked Up") {
+            if(delivery?.restaurantCoords) {
+                setAgentPosition(delivery.restaurantCoords);
+            }
+            return;
+        }
 
         setAgentPosition(delivery.restaurantCoords);
         const interval = setInterval(() => {
@@ -129,7 +137,8 @@ export default function TrackOrderPage() {
         return (
              <div className="flex items-center justify-center h-[calc(100vh-10rem)]">
                 <Card>
-                    <CardHeader>
+                    <CardHeader className="text-center">
+                        <Package className="mx-auto h-12 w-12 text-muted-foreground" />
                         <CardTitle>Order not found</CardTitle>
                         <CardDescription>We couldn't find tracking information for order #{orderId}.</CardDescription>
                     </CardHeader>
@@ -138,13 +147,25 @@ export default function TrackOrderPage() {
         )
     }
 
-    const progressPercentage = {
+    const progressMap: Record<DeliveryStatus, number> = {
         "Pending": 10,
         "Accepted": 25,
         "Picked Up": 50,
-        "On the way": 75,
         "Delivered": 100,
-    }[delivery.status] || 0;
+        "Declined": 0,
+    };
+    
+    const statusTextMap: Record<DeliveryStatus, string> = {
+        "Pending": "Waiting for restaurant to accept",
+        "Accepted": "Restaurant is preparing your order",
+        "Picked Up": "Your order is on the way!",
+        "Delivered": "Your order has been delivered",
+        "Declined": "Order has been declined",
+    }
+    
+    const progressPercentage = progressMap[delivery.status] || 0;
+    const statusText = statusTextMap[delivery.status] || "Getting status...";
+    const estimatedTime = 15 - Math.floor(15 * (progressPercentage / 100));
 
 
     return (
@@ -185,8 +206,8 @@ export default function TrackOrderPage() {
                     <CardDescription>From {delivery.restaurantName}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                   <OrderStatus status={delivery.status} progress={progressPercentage} />
-                   <DeliveryAgentInfo />
+                   <OrderStatus status={statusText} progress={progressPercentage} estimatedTime={estimatedTime} />
+                   {delivery.status === "Picked Up" && <DeliveryAgentInfo />}
                 </CardContent>
             </Card>
         </div>

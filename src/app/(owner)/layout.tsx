@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import {
   Bell,
@@ -11,6 +11,7 @@ import {
   Package,
   Settings,
   Users,
+  Utensils,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +38,7 @@ import { useUser, useFirestore, useCollection } from "@/firebase";
 import { getAuth, signOut } from "firebase/auth";
 import { collection } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface Order {
   id: string;
@@ -80,6 +82,23 @@ function OwnerLayoutSkeleton() {
   )
 }
 
+const NavLink = ({ href, children, className, ...props }: { href: string, children: React.ReactNode, className?: string }) => {
+    const pathname = usePathname();
+    const isActive = pathname === href;
+    return (
+        <Link
+            href={href}
+            className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                isActive && "bg-muted text-primary",
+                className
+            )}
+            {...props}
+        >
+            {children}
+        </Link>
+    );
+};
 
 export default function OwnerLayout({
   children,
@@ -118,6 +137,13 @@ export default function OwnerLayout({
     return <OwnerLayoutSkeleton />;
   }
 
+  const navLinks = [
+    { href: "/manage", icon: Home, label: "Menu" },
+    { href: "/manage/orders", icon: Package, label: "Orders", badge: pendingOrderCount },
+    { href: "/manage/customers", icon: Users, label: "Customers" },
+    { href: "/manage/settings", icon: Settings, label: "Settings" },
+  ];
+
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
@@ -133,39 +159,17 @@ export default function OwnerLayout({
           </div>
           <div className="flex-1">
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-              <Link
-                href="/manage"
-                className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
-              >
-                <Home className="h-4 w-4" />
-                Dashboard
-              </Link>
-              <Link
-                href="#"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-              >
-                <Package className="h-4 w-4" />
-                Orders
-                {pendingOrderCount > 0 && (
-                  <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                    {pendingOrderCount}
-                  </Badge>
-                )}
-              </Link>
-              <Link
-                href="#"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-              >
-                <Users className="h-4 w-4" />
-                Customers
-              </Link>
-              <Link
-                href="#"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-              >
-                <Settings className="h-4 w-4" />
-                Settings
-              </Link>
+              {navLinks.map(link => (
+                  <NavLink key={link.href} href={link.href}>
+                      <link.icon className="h-4 w-4" />
+                      {link.label}
+                      {link.badge !== undefined && link.badge > 0 && (
+                          <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
+                              {link.badge}
+                          </Badge>
+                      )}
+                  </NavLink>
+              ))}
             </nav>
           </div>
           <div className="mt-auto p-4">
@@ -207,32 +211,17 @@ export default function OwnerLayout({
                 >
                   <Logo />
                 </Link>
-                <Link
-                  href="/manage"
-                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl bg-muted px-3 py-2 text-foreground hover:text-foreground"
-                >
-                  <Home className="h-5 w-5" />
-                  Dashboard
-                </Link>
-                <Link
-                  href="#"
-                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-                >
-                  <Package className="h-5 w-5" />
-                  Orders
-                  {pendingOrderCount > 0 && (
-                    <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                      {pendingOrderCount}
-                    </Badge>
-                  )}
-                </Link>
-                <Link
-                  href="#"
-                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-                >
-                  <Settings className="h-5 w-5" />
-                  Settings
-                </Link>
+                {navLinks.map(link => (
+                  <NavLink key={link.href} href={link.href} className="text-lg">
+                      <link.icon className="h-5 w-5" />
+                      {link.label}
+                      {link.badge !== undefined && link.badge > 0 && (
+                          <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
+                              {link.badge}
+                          </Badge>
+                      )}
+                  </NavLink>
+              ))}
               </nav>
             </SheetContent>
           </Sheet>

@@ -185,7 +185,14 @@
           "type": "string"
         },
         "status": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "Pending",
+            "Accepted",
+            "Picked Up",
+            "Delivered",
+            "Declined"
+          ]
         },
         "restaurantCoords": {
           "type": "object",

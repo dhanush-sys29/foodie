@@ -58,10 +58,10 @@ export function UserHeader() {
           Restaurants
         </Link>
         <Link
-          href="/track/1"
+          href="/orders"
           className="text-muted-foreground transition-colors hover:text-foreground"
         >
-          Track Order
+          My Orders
         </Link>
       </nav>
       <Sheet>
@@ -83,10 +83,10 @@ export function UserHeader() {
               Restaurants
             </Link>
             <Link
-              href="/track/1"
+              href="/orders"
               className="text-muted-foreground hover:text-foreground"
             >
-              Track Order
+              My Orders
             </Link>
           </nav>
         </SheetContent>
@@ -123,8 +123,8 @@ export function UserHeader() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Order History</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('#')}>Profile</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/orders')}>Order History</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>
                 Logout

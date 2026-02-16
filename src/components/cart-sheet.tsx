@@ -18,7 +18,8 @@ import { useUser, useFirestore } from "@/firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { v4 as uuidv4 } from 'uuid';
-import { addDoc as addDeliveryDoc } from "firebase/firestore";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 export function CartSheet() {
   const {
@@ -36,40 +37,42 @@ export function CartSheet() {
   const { toast } = useToast();
   const router = useRouter();
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (!user || !firestore || !restaurant || cartItems.length === 0) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Cannot proceed with checkout.",
+        description: "Cannot proceed with checkout. Your cart may be empty.",
       });
       return;
     }
 
+    const orderId = uuidv4();
     const ordersRef = collection(firestore, "restaurants", restaurant.id, "orders");
     const deliveriesRef = collection(firestore, "deliveries");
-    const orderId = uuidv4();
+    
+    // 1. Create the order
+    const orderData = {
+        orderId: orderId,
+        customerId: user.uid,
+        customerName: user.displayName || user.email,
+        status: "Pending",
+        total: getCartTotal(),
+        createdAt: serverTimestamp(),
+        items: cartItems.map(item => ({
+            itemId: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+        })),
+    };
 
-    try {
-        // 1. Create the order
-        await addDoc(ordersRef, {
-            orderId: orderId,
-            customerId: user.uid,
-            customerName: user.displayName || user.email,
-            status: "Pending",
-            total: getCartTotal(),
-            createdAt: serverTimestamp(),
-            items: cartItems.map(item => ({
-                itemId: item.id,
-                name: item.name,
-                price: item.price,
-                quantity: item.quantity,
-            })),
-        });
-
+    addDoc(ordersRef, orderData)
+      .then(() => {
         // 2. Create a delivery job (simulating backend logic)
         // In a real app, this would be a Cloud Function triggered by the new order.
-        await addDeliveryDoc(deliveriesRef, {
+        // The addresses and coordinates here are placeholders.
+        const deliveryData = {
             id: uuidv4(),
             orderId: orderId,
             restaurantName: restaurant.name,
@@ -78,8 +81,11 @@ export function CartSheet() {
             status: 'Pending',
             restaurantCoords: { lat: 34.0522, lng: -118.2437 }, // Placeholder (LA)
             customerCoords: { lat: 34.0622, lng: -118.2537 }, // Placeholder (Near LA)
-        });
+        };
 
+        return addDoc(deliveriesRef, deliveryData);
+      })
+      .then(() => {
         toast({
             title: "Order Placed!",
             description: "Your order has been placed successfully.",
@@ -87,15 +93,21 @@ export function CartSheet() {
         clearCart();
         setCartOpen(false);
         router.push(`/track/${orderId}`);
-
-    } catch (error) {
+      })
+      .catch((error) => {
         console.error("Checkout Error: ", error);
         toast({
             variant: "destructive",
             title: "Checkout Failed",
-            description: "There was an error placing your order.",
+            description: "There was an error placing your order. You may not have permission.",
         });
-    }
+        const permissionError = new FirestorePermissionError({
+            path: error.message.includes('deliveries') ? deliveriesRef.path : ordersRef.path,
+            operation: 'create',
+            requestResourceData: error.message.includes('deliveries') ? {} : orderData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+    });
   };
 
   return (
@@ -103,9 +115,11 @@ export function CartSheet() {
       <SheetContent className="flex w-full flex-col pr-0 sm:max-w-lg">
         <SheetHeader className="px-6">
           <SheetTitle>Cart ({getCartCount()})</SheetTitle>
-          <SheetDescription>
-            You are ordering from <strong>{restaurant?.name}</strong>
-          </SheetDescription>
+          {restaurant ? (
+             <SheetDescription>
+                You are ordering from <strong>{restaurant?.name}</strong>
+             </SheetDescription>
+          ) : null}
         </SheetHeader>
         <Separator />
         {cartItems.length > 0 ? (

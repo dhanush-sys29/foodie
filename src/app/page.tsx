@@ -185,6 +185,7 @@ export default function LoginPage() {
           fill
           className="object-cover z-0"
           data-ai-hint="food ingredients"
+          priority
         />
         <div className="absolute inset-0 bg-black/60 z-0" />
         

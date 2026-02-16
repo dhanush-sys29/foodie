@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAuth, signOut } from "firebase/auth";
 import {
-  Search,
   ShoppingCart,
   Menu,
 } from "lucide-react";
@@ -15,7 +14,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -92,16 +90,7 @@ export function UserHeader() {
         </SheetContent>
       </Sheet>
       <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
-        <form className="ml-auto flex-1 sm:flex-initial">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search restaurants..."
-              className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
-            />
-          </div>
-        </form>
+        <div className="ml-auto flex-1 sm:flex-initial" />
         <Button variant="ghost" size="icon" className="relative" onClick={() => setCartOpen(true)}>
             <ShoppingCart className="h-5 w-5"/>
             <span className="sr-only">Shopping Cart</span>

@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { notFound, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Star, Clock, PlusCircle } from "lucide-react";
 import {
   Card,
@@ -53,6 +54,11 @@ export default function RestaurantPage() {
     return collection(firestore, "restaurants", id, "menuItems");
   }, [firestore, id]);
   const { data: menu, loading: menuLoading } = useCollection<MenuItem>(menuRef);
+
+  const availableMenu = useMemo(() => {
+    if (!menu) return [];
+    return menu.filter(item => item.available);
+  }, [menu]);
 
   if (restaurantLoading || menuLoading) {
     return (
@@ -140,43 +146,48 @@ export default function RestaurantPage() {
 
       <div className="mt-8">
         <h2 className="text-2xl font-bold font-headline mb-6">Menu</h2>
-        <div className="grid gap-6 md:grid-cols-2">
-          {menu?.map((item) => (
-            <Card key={item.id} className="flex flex-col">
-              <CardHeader className="flex flex-row gap-4 items-start">
-                <div className="relative w-24 h-24 flex-shrink-0">
-                  <Image
-                    src={`https://picsum.photos/seed/${item.id}/200/200`}
-                    alt={item.name}
-                    fill
-                    className="rounded-md object-cover"
-                    data-ai-hint={item.imageHint}
-                  />
-                </div>
-                <div className="flex-grow">
-                  <CardTitle>{item.name}</CardTitle>
-                  <CardDescription className="mt-1">
-                    {item.description}
-                  </CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent className="flex-grow flex items-end justify-between">
-                <p className="text-lg font-semibold">
-                  ₹{item.price.toFixed(2)}
-                </p>
-                <Button disabled={!item.available} size="sm" onClick={() => handleAddToCart(item)}>
-                  {item.available ? (
-                    <>
-                      <PlusCircle className="mr-2 h-4 w-4" /> Add
-                    </>
-                  ) : (
-                    "Unavailable"
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+        {availableMenu.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-2">
+            {availableMenu.map((item) => (
+              <Card key={item.id} className="flex flex-col">
+                <CardHeader className="flex flex-row gap-4 items-start">
+                  <div className="relative w-24 h-24 flex-shrink-0">
+                    <Image
+                      src={`https://picsum.photos/seed/${item.id}/200/200`}
+                      alt={item.name}
+                      fill
+                      className="rounded-md object-cover"
+                      data-ai-hint={item.imageHint}
+                    />
+                  </div>
+                  <div className="flex-grow">
+                    <CardTitle>{item.name}</CardTitle>
+                    <CardDescription className="mt-1">
+                      {item.description}
+                    </CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent className="flex-grow flex items-end justify-between">
+                  <p className="text-lg font-semibold">
+                    ₹{item.price.toFixed(2)}
+                  </p>
+                  <Button size="sm" onClick={() => handleAddToCart(item)}>
+                    <PlusCircle className="mr-2 h-4 w-4" /> Add
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center text-center bg-background p-10 rounded-lg border-2 border-dashed">
+            <p className="text-lg font-semibold text-muted-foreground">
+                This restaurant's menu is currently empty.
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+                Please check back later for delicious items.
+            </p>
         </div>
+        )}
       </div>
     </div>
   );

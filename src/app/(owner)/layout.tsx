@@ -12,17 +12,11 @@ import {
   Settings,
   Users,
   Utensils,
+  LifeBuoy,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -62,9 +56,6 @@ function OwnerLayoutSkeleton() {
               <Skeleton className="h-8 w-full" />
               <Skeleton className="h-8 w-full" />
             </div>
-          </div>
-          <div className="mt-auto p-4">
-            <Skeleton className="h-32 w-full" />
           </div>
         </div>
       </div>
@@ -138,7 +129,7 @@ export default function OwnerLayout({
   }
 
   const navLinks = [
-    { href: "/manage", icon: Home, label: "Menu" },
+    { href: "/manage", icon: Utensils, label: "Menu" },
     { href: "/manage/orders", icon: Package, label: "Orders", badge: pendingOrderCount },
     { href: "/manage/customers", icon: Users, label: "Customers" },
     { href: "/manage/settings", icon: Settings, label: "Settings" },
@@ -171,22 +162,6 @@ export default function OwnerLayout({
                   </NavLink>
               ))}
             </nav>
-          </div>
-          <div className="mt-auto p-4">
-            <Card>
-              <CardHeader className="p-2 pt-0 md:p-4">
-                <CardTitle>Upgrade to Pro</CardTitle>
-                <CardDescription>
-                  Unlock all features and get unlimited access to our support
-                  team.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-2 pt-0 md:p-4 md:pt-0">
-                <Button size="sm" className="w-full">
-                  Upgrade
-                </Button>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>
@@ -239,8 +214,8 @@ export default function OwnerLayout({
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/manage/settings')}>Settings</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/manage/support')}>Support</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
             </DropdownMenuContent>

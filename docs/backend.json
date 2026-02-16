@@ -215,6 +215,14 @@
               "type": "number"
             }
           }
+        },
+        "agentId": {
+          "type": "string",
+          "description": "The UID of the delivery agent who accepted the job."
+        },
+        "deliveryFee": {
+          "type": "number",
+          "description": "The fee earned by the agent for this delivery."
         }
       },
       "required": [

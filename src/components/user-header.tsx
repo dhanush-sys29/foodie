@@ -72,7 +72,7 @@ export function UserHeader() {
         <SheetContent side="left">
           <nav className="grid gap-6 text-lg font-medium">
             <Link
-              href="#"
+              href="/dashboard"
               className="flex items-center gap-2 text-lg font-semibold"
             >
               <Logo />
@@ -112,7 +112,7 @@ export function UserHeader() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => router.push('#')}>Profile</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/profile')}>Profile</DropdownMenuItem>
               <DropdownMenuItem onClick={() => router.push('/orders')}>Order History</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>

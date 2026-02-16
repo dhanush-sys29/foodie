@@ -81,6 +81,7 @@ export function CartSheet() {
             status: 'Pending',
             restaurantCoords: { lat: 34.0522, lng: -118.2437 }, // Placeholder (LA)
             customerCoords: { lat: 34.0622, lng: -118.2537 }, // Placeholder (Near LA)
+            deliveryFee: 50, // Placeholder fee
         };
 
         return addDoc(deliveriesRef, deliveryData);

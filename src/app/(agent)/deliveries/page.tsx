@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { MapProvider } from "@/components/map-provider";
 import { Home, Utensils, Bike } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useCollection, useFirestore } from "@/firebase";
+import { useCollection, useFirestore, useUser } from "@/firebase";
 import { collection, doc, updateDoc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { errorEmitter } from "@/firebase/error-emitter";
@@ -30,10 +30,12 @@ interface DeliveryJob {
   status: string;
   restaurantCoords: { lat: number; lng: number };
   customerCoords: { lat: number; lng: number };
+  agentId?: string;
 }
 
 export default function DeliveriesPage() {
   const firestore = useFirestore();
+  const { user } = useUser();
   const deliveriesRef = useMemo(() => {
     if (!firestore) return null;
     return collection(firestore, "deliveries");
@@ -43,14 +45,21 @@ export default function DeliveriesPage() {
   const [selectedJob, setSelectedJob] = useState<DeliveryJob | null>(null);
 
   const updateDeliveryStatus = (jobId: string, status: string) => {
-    if (!firestore) return;
+    if (!firestore || !user) return;
     const deliveryRef = doc(firestore, "deliveries", jobId);
-    updateDoc(deliveryRef, { status: status })
+    
+    let updateData: { status: string, agentId?: string } = { status: status };
+
+    if (status === 'Picked Up') {
+        updateData.agentId = user.uid;
+    }
+
+    updateDoc(deliveryRef, updateData)
         .catch(async (serverError) => {
             const permissionError = new FirestorePermissionError({
                 path: deliveryRef.path,
                 operation: 'update',
-                requestResourceData: { status },
+                requestResourceData: updateData,
             });
             errorEmitter.emit('permission-error', permissionError);
         });
@@ -93,6 +102,14 @@ export default function DeliveriesPage() {
     lng: (currentJob.restaurantCoords.lng + currentJob.customerCoords.lng) / 2,
   };
 
+  const isJobActionable = (job: DeliveryJob) => {
+    // An agent can only action a job if it's not yet picked up, or if they are the one who picked it up.
+    return !job.agentId || job.agentId === user?.uid;
+  };
+  const isJobClaimedByOther = (job: DeliveryJob) => {
+    return job.agentId && job.agentId !== user?.uid;
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 h-[calc(100vh-4rem)]">
       <div className="lg:col-span-1 flex flex-col h-full bg-background border-r">
@@ -105,16 +122,17 @@ export default function DeliveriesPage() {
               key={job.id}
               className={cn(
                 "p-4 border-b cursor-pointer hover:bg-muted/50",
-                currentJob.id === job.id && "bg-muted"
+                currentJob.id === job.id && "bg-muted",
+                isJobClaimedByOther(job) && "opacity-50 cursor-not-allowed"
               )}
-              onClick={() => setSelectedJob(job)}
+              onClick={() => !isJobClaimedByOther(job) && setSelectedJob(job)}
             >
               <p className="font-semibold">{job.restaurantName}</p>
               <p className="text-sm text-muted-foreground truncate">
                 To: {job.customerAddress}
               </p>
               <p className="text-sm font-bold text-primary mt-1">
-                {job.status}
+                {job.status} {isJobClaimedByOther(job) && "(Claimed)"}
               </p>
             </div>
           ))}
@@ -171,13 +189,13 @@ export default function DeliveriesPage() {
             <p className="font-bold text-lg text-primary">{currentJob.status}</p>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button variant="outline" onClick={() => updateDeliveryStatus(currentJob.id, 'Declined')} disabled={currentJob.status === 'Declined' || currentJob.status === 'Delivered'}>Decline</Button>
+            <Button variant="outline" onClick={() => updateDeliveryStatus(currentJob.id, 'Declined')} disabled={!isJobActionable(currentJob) || currentJob.status === 'Declined' || currentJob.status === 'Delivered'}>Decline</Button>
             {currentJob.status === 'Picked Up' ? (
-              <Button onClick={() => updateDeliveryStatus(currentJob.id, 'Delivered')}>
+              <Button onClick={() => updateDeliveryStatus(currentJob.id, 'Delivered')} disabled={!isJobActionable(currentJob)}>
                 <Home className="mr-2 h-4 w-4" /> Delivered
               </Button>
             ) : currentJob.status !== 'Delivered' && currentJob.status !== 'Declined' ? (
-              <Button onClick={() => updateDeliveryStatus(currentJob.id, 'Picked Up')}>
+              <Button onClick={() => updateDeliveryStatus(currentJob.id, 'Picked Up')} disabled={!isJobActionable(currentJob)}>
                 <Bike className="mr-2 h-4 w-4" /> Picked Up
               </Button>
             ) : null}

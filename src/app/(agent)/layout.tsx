@@ -1,7 +1,7 @@
 
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +17,23 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@/firebase";
 import { getAuth, signOut } from "firebase/auth";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+
+const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
+    const pathname = usePathname();
+    const isActive = pathname.startsWith(href);
+    return (
+        <Link
+            href={href}
+            className={cn(
+                "transition-colors hover:text-foreground",
+                isActive ? "text-foreground" : "text-muted-foreground"
+            )}
+        >
+            {children}
+        </Link>
+    );
+};
 
 
 function AgentLayoutSkeleton() {
@@ -30,7 +47,8 @@ function AgentLayoutSkeleton() {
           >
             <Logo />
           </Link>
-          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-5 w-24" />
+          <Skeleton className="h-5 w-24" />
         </nav>
         <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
             <div className="ml-auto flex-1 sm:flex-initial" />
@@ -78,12 +96,8 @@ export default function AgentLayout({
           >
             <Logo />
           </Link>
-          <Link
-            href="/deliveries"
-            className="text-foreground transition-colors hover:text-foreground"
-          >
-            My Deliveries
-          </Link>
+          <NavLink href="/deliveries">My Deliveries</NavLink>
+          <NavLink href="/earnings">Earnings</NavLink>
         </nav>
         <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
             <div className="ml-auto flex-1 sm:flex-initial" />
@@ -100,8 +114,8 @@ export default function AgentLayout({
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => router.push('/agent/profile')}>Profile</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push('/agent/earnings')}>Earnings</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/agent-profile')}>Profile</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/earnings')}>Earnings</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
             </DropdownMenuContent>

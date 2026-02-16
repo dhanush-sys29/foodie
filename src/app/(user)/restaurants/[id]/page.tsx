@@ -18,6 +18,7 @@ import { collection, doc } from "firebase/firestore";
 import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/context/cart-context";
+import { cn } from "@/lib/utils";
 
 interface Restaurant {
   id: string;
@@ -54,11 +55,6 @@ export default function RestaurantPage() {
     return collection(firestore, "restaurants", id, "menuItems");
   }, [firestore, id]);
   const { data: menu, loading: menuLoading } = useCollection<MenuItem>(menuRef);
-
-  const availableMenu = useMemo(() => {
-    if (!menu) return [];
-    return menu.filter(item => item.available);
-  }, [menu]);
 
   if (restaurantLoading || menuLoading) {
     return (
@@ -146,10 +142,16 @@ export default function RestaurantPage() {
 
       <div className="mt-8">
         <h2 className="text-2xl font-bold font-headline mb-6">Menu</h2>
-        {availableMenu.length > 0 ? (
+        {menu && menu.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2">
-            {availableMenu.map((item) => (
-              <Card key={item.id} className="flex flex-col">
+            {menu.map((item) => (
+              <Card
+                key={item.id}
+                className={cn(
+                  "flex flex-col transition-opacity",
+                  !item.available && "opacity-60"
+                )}
+              >
                 <CardHeader className="flex flex-row gap-4 items-start">
                   <div className="relative w-24 h-24 flex-shrink-0">
                     <Image
@@ -171,9 +173,15 @@ export default function RestaurantPage() {
                   <p className="text-lg font-semibold">
                     ₹{item.price.toFixed(2)}
                   </p>
-                  <Button size="sm" onClick={() => handleAddToCart(item)}>
-                    <PlusCircle className="mr-2 h-4 w-4" /> Add
-                  </Button>
+                  {item.available ? (
+                    <Button size="sm" onClick={() => handleAddToCart(item)}>
+                      <PlusCircle className="mr-2 h-4 w-4" /> Add
+                    </Button>
+                  ) : (
+                    <Button size="sm" disabled>
+                      Out of stock
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -181,12 +189,12 @@ export default function RestaurantPage() {
         ) : (
           <div className="flex flex-col items-center justify-center text-center bg-background p-10 rounded-lg border-2 border-dashed">
             <p className="text-lg font-semibold text-muted-foreground">
-                This restaurant's menu is currently empty.
+              This restaurant's menu is currently empty.
             </p>
             <p className="text-sm text-muted-foreground mt-2">
-                Please check back later for delicious items.
+              Please check back later for delicious items.
             </p>
-        </div>
+          </div>
         )}
       </div>
     </div>

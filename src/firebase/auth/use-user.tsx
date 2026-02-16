@@ -23,32 +23,36 @@ export function useUser() {
       setLoading(false);
       return;
     }
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      if (!user) {
-        setProfile(null);
-        setLoading(false);
-      }
+  
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+      setLoading(false); // 🔥 ALWAYS set loading here
     });
+  
     return () => unsubscribe();
-  }, [auth]);
+  }, []); // 🔥 IMPORTANT: empty dependency array
 
   useEffect(() => {
-    if (user && firestore) {
-      const profileRef = doc(firestore, 'users', user.uid);
-      const unsubscribe = onSnapshot(profileRef, (doc) => {
-        if (doc.exists()) {
-          setProfile(doc.data() as UserProfile);
-        } else {
-          setProfile(null);
-        }
-        setLoading(false);
-      });
-      return () => unsubscribe();
-    } else if (!user) {
-        setLoading(false);
+    if (!user) {
+      setProfile(null);
+      return;
     }
+  
+    if (!firestore) return;
+  
+    const profileRef = doc(firestore, "users", user.uid);
+  
+    const unsubscribe = onSnapshot(profileRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setProfile(docSnap.data() as UserProfile);
+      } else {
+        setProfile(null);
+      }
+    });
+  
+    return () => unsubscribe();
   }, [user, firestore]);
+  
 
   return { user, profile, loading };
 }

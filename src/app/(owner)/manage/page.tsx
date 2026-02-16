@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from "next/image";
@@ -124,6 +123,12 @@ export default function OwnerDashboard() {
     const itemRef = doc(firestore, "restaurants", restaurantId, "menuItems", itemId);
     const updatedData = { available: !currentStatus };
     updateDoc(itemRef, updatedData)
+        .then(() => {
+            toast({
+                title: "Availability Updated",
+                description: `Item is now ${!currentStatus ? 'available' : 'unavailable'}.`
+            });
+        })
         .catch(async (serverError) => {
             const permissionError = new FirestorePermissionError({
                 path: itemRef.path,

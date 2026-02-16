@@ -43,10 +43,12 @@ export default function Dashboard() {
   const filteredRestaurants = useMemo(() => {
     if (!restaurants) return [];
     if (!searchQuery) return restaurants;
-    return restaurants.filter(restaurant => 
-      restaurant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      restaurant.cuisine.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    return restaurants.filter(restaurant => {
+        const query = searchQuery.toLowerCase();
+        const nameMatch = restaurant.name && restaurant.name.toLowerCase().includes(query);
+        const cuisineMatch = restaurant.cuisine && restaurant.cuisine.toLowerCase().includes(query);
+        return nameMatch || cuisineMatch;
+    });
   }, [restaurants, searchQuery]);
 
 

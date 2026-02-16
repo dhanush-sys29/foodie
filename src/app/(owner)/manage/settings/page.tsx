@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo, useEffect } from "react";
@@ -67,7 +68,7 @@ export default function SettingsPage() {
         imageHint: restaurant.imageHint || "",
       });
     }
-  }, [restaurant, form]);
+  }, [restaurant, form.reset]);
 
 
   const onSubmit = (values: z.infer<typeof restaurantSettingsSchema>) => {

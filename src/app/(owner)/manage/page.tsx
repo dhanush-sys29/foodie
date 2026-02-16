@@ -134,6 +134,56 @@ export default function OwnerDashboard() {
         });
   };
 
+  const handleExport = () => {
+    if (!myMenuItems || myMenuItems.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Nothing to Export",
+        description: "There are no menu items to export.",
+      });
+      return;
+    }
+
+    // Define headers for the CSV file
+    const headers = ["ID", "Name", "Description", "Price", "Available", "Image Hint"];
+    
+    // Function to safely escape and format a string for CSV
+    const escapeCsv = (str: string) => `"${(str || '').replace(/"/g, '""')}"`;
+
+    // Convert menu items data to CSV format
+    const csvRows = [
+      headers.join(','),
+      ...myMenuItems.map(item => 
+        [
+          escapeCsv(item.id),
+          escapeCsv(item.name),
+          escapeCsv(item.description),
+          item.price,
+          item.available,
+          escapeCsv(item.imageHint)
+        ].join(',')
+      )
+    ];
+    const csvContent = csvRows.join('\n');
+
+    // Create a Blob and trigger a download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "menu-items.csv");
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Export Successful",
+      description: "Your menu has been downloaded as a CSV file.",
+    });
+  };
+
   const menuContent = menuLoading ? (
     <TableBody>
       {Array.from({ length: 3 }).map((_, i) => (
@@ -202,7 +252,7 @@ export default function OwnerDashboard() {
           My Menu
         </h1>
         <div className="ml-auto flex items-center gap-2">
-            <Button size="sm" variant="outline" className="h-8 gap-1">
+            <Button size="sm" variant="outline" className="h-8 gap-1" onClick={handleExport}>
                 <File className="h-3.5 w-3.5" />
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                 Export

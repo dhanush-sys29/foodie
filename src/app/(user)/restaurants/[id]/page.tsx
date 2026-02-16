@@ -36,20 +36,21 @@ interface MenuItem {
 }
 
 export default function RestaurantPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const firestore = useFirestore();
   const { addToCart } = useCart();
 
   const restaurantRef = useMemo(() => {
     if (!firestore) return null;
-    return doc(firestore, "restaurants", params.id);
-  }, [firestore, params.id]);
+    return doc(firestore, "restaurants", id);
+  }, [firestore, id]);
   const { data: restaurant, loading: restaurantLoading } =
     useDoc<Restaurant>(restaurantRef);
 
   const menuRef = useMemo(() => {
     if (!firestore) return null;
-    return collection(firestore, "restaurants", params.id, "menuItems");
-  }, [firestore, params.id]);
+    return collection(firestore, "restaurants", id, "menuItems");
+  }, [firestore, id]);
   const { data: menu, loading: menuLoading } = useCollection<MenuItem>(menuRef);
 
   if (restaurantLoading || menuLoading) {
@@ -107,7 +108,7 @@ export default function RestaurantPage({ params }: { params: { id: string } }) {
       <Card className="overflow-hidden">
         <div className="relative h-64 w-full">
           <Image
-            src={`https://picsum.photos/seed/${params.id}/1200/400`}
+            src={`https://picsum.photos/seed/${id}/1200/400`}
             alt={restaurant.name}
             fill
             className="object-cover"

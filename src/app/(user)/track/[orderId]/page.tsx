@@ -78,11 +78,12 @@ function LoadingSkeleton() {
 }
 
 export default function TrackOrderPage({ params }: { params: { orderId: string } }) {
+    const { orderId } = params;
     const firestore = useFirestore();
     const deliveryQuery = useMemo(() => {
         if (!firestore) return null;
-        return query(collection(firestore, "deliveries"), where("orderId", "==", params.orderId))
-    }, [firestore, params.orderId]);
+        return query(collection(firestore, "deliveries"), where("orderId", "==", orderId))
+    }, [firestore, orderId]);
 
     const { data: deliveries, loading } = useCollection<DeliveryJob>(deliveryQuery);
     const delivery = deliveries?.[0];
@@ -128,7 +129,7 @@ export default function TrackOrderPage({ params }: { params: { orderId: string }
                 <Card>
                     <CardHeader>
                         <CardTitle>Order not found</CardTitle>
-                        <CardDescription>We couldn't find tracking information for order #{params.orderId}.</CardDescription>
+                        <CardDescription>We couldn't find tracking information for order #{orderId}.</CardDescription>
                     </CardHeader>
                 </Card>
              </div>
@@ -178,7 +179,7 @@ export default function TrackOrderPage({ params }: { params: { orderId: string }
             </div>
             <Card className="md:col-span-1 animate-in fade-in duration-500 delay-150">
                 <CardHeader>
-                    <CardTitle>Tracking Order #{params.orderId.substring(0, 7)}</CardTitle>
+                    <CardTitle>Tracking Order #{orderId.substring(0, 7)}</CardTitle>
                     <CardDescription>From {delivery.restaurantName}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
